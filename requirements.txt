@@ -1,0 +1,6 @@
+# All three demos run on the Python standard library alone.
+# OpenTelemetry is optional; enable it by editing _bootstrap.py
+# (set enable_otel=True) and installing:
+#   opentelemetry-api
+#   opentelemetry-sdk
+#   opentelemetry-exporter-otlp
