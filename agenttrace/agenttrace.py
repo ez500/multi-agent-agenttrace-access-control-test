@@ -147,6 +147,14 @@ class ALogger:
 
     # Recording methods
 
+    def _resolve_agent_name(self, agent_name: Optional[str]) -> str:
+        """Resolve the per-event agent name using explicit → contextvar → global."""
+        return (
+            agent_name
+            or TraceContext.get_current_agent_name()
+            or self.agent_name
+        )
+
     def record_operational(
             self,
             method: str,
@@ -159,6 +167,7 @@ class ALogger:
             duration_ms: Optional[float] = None,
             level: TraceLevel = TraceLevel.INFO,
             error: Optional[str] = None,
+            agent_name: Optional[str] = None,
             **extra,
     ) -> TraceEvent:
         """Record an operational surface event."""
@@ -175,7 +184,7 @@ class ALogger:
             trace_id=trace_id or TraceContext.get_current_trace_id(),
             span_id=span_id or TraceContext.new_span_id(),
             parent_span_id=parent_span_id or TraceContext.get_current_span_id() or None,
-            agent_name=self.agent_name,
+            agent_name=self._resolve_agent_name(agent_name),
             level=level,
             span_kind=SpanKind.INTERNAL,
             body=body,
@@ -191,6 +200,7 @@ class ALogger:
             trace_id: str = "",
             span_id: str = "",
             args_summary: Optional[str] = None,
+            agent_name: Optional[str] = None,
             **extra,
     ) -> str:
         """
@@ -206,6 +216,7 @@ class ALogger:
             parent_span_id=TraceContext.get_current_span_id() or None,
             args_summary=args_summary,
             level=TraceLevel.INFO,
+            agent_name=agent_name,
             **extra,
         )
         return span_id
@@ -216,6 +227,7 @@ class ALogger:
             span_id: str,
             duration_ms: float,
             result_summary: Optional[str] = None,
+            agent_name: Optional[str] = None,
             **extra,
     ):
         """Record an operational COMPLETE event."""
@@ -228,6 +240,7 @@ class ALogger:
             result_summary=result_summary,
             duration_ms=duration_ms,
             level=TraceLevel.INFO,
+            agent_name=agent_name,
             **extra,
         )
 
@@ -237,6 +250,7 @@ class ALogger:
             span_id: str,
             duration_ms: float,
             error: str,
+            agent_name: Optional[str] = None,
             **extra,
     ):
         """Record an operational ERROR event."""
@@ -249,6 +263,7 @@ class ALogger:
             duration_ms=duration_ms,
             error=error,
             level=TraceLevel.ERROR,
+            agent_name=agent_name,
             **extra,
         )
 
@@ -266,6 +281,7 @@ class ALogger:
             temperature: Optional[float] = None,
             trace_id: str = "",
             span_id: str = "",
+            agent_name: Optional[str] = None,
             **extra,
     ) -> TraceEvent:
         """Record a cognitive surface event (LLM interaction)."""
@@ -287,7 +303,7 @@ class ALogger:
             trace_id=trace_id or TraceContext.get_current_trace_id(),
             span_id=span_id or TraceContext.new_span_id(),
             parent_span_id=TraceContext.get_current_span_id() or None,
-            agent_name=self.agent_name,
+            agent_name=self._resolve_agent_name(agent_name),
             level=TraceLevel.INFO,
             span_kind=SpanKind.CLIENT,
             body=body,
@@ -306,6 +322,7 @@ class ALogger:
             status_code: Optional[int] = None,
             trace_id: str = "",
             span_id: str = "",
+            agent_name: Optional[str] = None,
             **extra,
     ) -> TraceEvent:
         """Record a contextual surface event (external I/O)."""
@@ -324,7 +341,7 @@ class ALogger:
             trace_id=trace_id or TraceContext.get_current_trace_id(),
             span_id=span_id or TraceContext.new_span_id(),
             parent_span_id=TraceContext.get_current_span_id() or None,
-            agent_name=self.agent_name,
+            agent_name=self._resolve_agent_name(agent_name),
             level=TraceLevel.INFO,
             span_kind=SpanKind.CLIENT,
             body=body,
@@ -776,6 +793,7 @@ def _make_wrapper(
             span_id=span_id,
             args_summary=args_summary,
             args_count=len(args) + len(kwargs),
+            agent_name=agent_name,
         )
 
         # Update contextvars so AgentTrace events recorded inside the
@@ -808,6 +826,7 @@ def _make_wrapper(
                 duration_ms=duration_ms,
                 result_summary=result_summary,
                 result_type=type(result).__name__,
+                agent_name=agent_name,
             )
 
             return result
@@ -820,6 +839,7 @@ def _make_wrapper(
                 span_id=span_id,
                 duration_ms=duration_ms,
                 error=repr(e),
+                agent_name=agent_name,
             )
             # Surface the failure on the OTel span too so Jaeger marks it red.
             if otel_span is not None:
@@ -903,6 +923,7 @@ def _maybe_extract_cognitive(
                 trace_id=trace_id,
                 span_id=span_id,
                 source="dict_field",
+                agent_name=agent_name,
             )
             extracted = True
         return result, extracted
@@ -963,6 +984,7 @@ def _extract_cognitive_from_text(
             trace_id=trace_id,
             span_id=span_id,
             extraction_method="thinking_tag",
+            agent_name=agent_name,
         )
         extracted = True
 
@@ -974,6 +996,7 @@ def _extract_cognitive_from_text(
             trace_id=trace_id,
             span_id=span_id,
             extraction_method="plan_tag",
+            agent_name=agent_name,
         )
         extracted = True
 
@@ -987,6 +1010,7 @@ def _extract_cognitive_from_text(
             trace_id=trace_id,
             span_id=span_id,
             extraction_method="json_field",
+            agent_name=agent_name,
         )
         extracted = True
 
@@ -998,6 +1022,7 @@ def _extract_cognitive_from_text(
             trace_id=trace_id,
             span_id=span_id,
             extraction_method="cot_steps",
+            agent_name=agent_name,
         )
         extracted = True
 
