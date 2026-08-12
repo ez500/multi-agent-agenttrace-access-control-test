@@ -12,15 +12,30 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-AGENTTRACE_DIR = ROOT / "agenttrace"
+REPO_ROOT = ROOT.parent                          # repository root
 TRACE_LOG_DIR = ROOT / "trace_logs"
 TRACE_JSONL = TRACE_LOG_DIR / "traces.jsonl"
 
+# Candidate locations for the vendored agenttrace package directory. The
+# repo-root sibling is the real one; the in-package copy is tried first so a
+# self-contained vendored drop-in would also work.
+_AGENTTRACE_CANDIDATES = (
+    ROOT / "agenttrace",
+    REPO_ROOT / "agenttrace",
+)
+
 
 def _ensure_agenttrace_on_path() -> None:
-    p = str(AGENTTRACE_DIR)
-    if p not in sys.path:
-        sys.path.insert(0, p)
+    for candidate in _AGENTTRACE_CANDIDATES:
+        if (candidate / "agenttrace.py").exists():
+            p = str(candidate)
+            if p not in sys.path:
+                sys.path.insert(0, p)
+            return
+    raise RuntimeError(
+        "Could not locate the agenttrace package. Looked in: "
+        + ", ".join(str(c) for c in _AGENTTRACE_CANDIDATES)
+    )
 
 
 def reset_trace_log() -> None:

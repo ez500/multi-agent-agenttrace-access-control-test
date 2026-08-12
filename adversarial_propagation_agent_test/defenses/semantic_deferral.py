@@ -39,7 +39,7 @@ def haiku_auditor(buckets: Dict[str, List[dict]]) -> "DeferralDecision":
     that asks for ``{"safe": bool, "reason": str}``. Token cost is bounded
     by the caller (``max_events_per_surface``).
     """
-    from adversarial_propagation_agent_test.multiagent.llm import call_haiku  # local import to avoid cycles
+    from multiagent.llm import call_haiku  # local import to avoid cycles
 
     def _digest(events: List[dict], keep: int = 8, cap: int = 200) -> List[dict]:
         out = []
