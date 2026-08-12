@@ -114,8 +114,10 @@ def haiku_injection_auditor(buckets: Dict[str, List[dict]]) -> "DetectionVerdict
     user = "AgentTrace surfaces:\n" + json.dumps(payload, indent=2, default=str)
 
     try:
+        # Give the verdict room to complete: a truncated reason string yields
+        # invalid JSON and would force the fail-closed path below.
         resp = call_haiku(system=system, user=user,
-                          role_label="injection_auditor", max_tokens=200)
+                          role_label="injection_auditor", max_tokens=400)
     except Exception as exc:
         return DetectionVerdict(
             detected=True, severity="HIGH",
@@ -123,6 +125,9 @@ def haiku_injection_auditor(buckets: Dict[str, List[dict]]) -> "DetectionVerdict
         )
 
     text = (resp.text or "").strip()
+    # Tolerate ```json ... ``` fences the model sometimes wraps the object in.
+    if text.startswith("```"):
+        text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text, flags=re.DOTALL).strip()
     match = re.search(r"\{.*\}", text, re.DOTALL)
     if match:
         try:

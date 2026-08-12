@@ -107,6 +107,20 @@ def _summarize(text: str, cap: int = 240) -> str:
     return text if len(text) <= cap else text[: cap - 1] + "…"
 
 
+def _summarize_prompt(system: str, user: str,
+                      system_cap: int = 120, user_cap: int = 400) -> str:
+    """Summarise a system+user prompt, giving the *user* message its own budget.
+
+    The user message is the untrusted caller input, so it is where injection
+    markers live. Summarising ``system + user`` under a single small cap can push
+    the user content out entirely once the system prompt grows — which would blind
+    the AgentTrace detector's cognitive-surface marker/canary scan. Budgeting the
+    two separately keeps the caller's request visible regardless of system length.
+    """
+    return (f"[system] {_summarize(system, system_cap)} "
+            f"||| [user] {_summarize(user, user_cap)}")
+
+
 def _indent(text: str, prefix: str = "    ") -> str:
     """Indent every line of *text* for readable verbose output."""
     return "\n".join(prefix + line for line in text.splitlines()) if text else prefix + "(empty)"
@@ -192,7 +206,7 @@ def call_haiku(
         logger.record_cognitive(
             thought=None,
             model=model_name,
-            prompt_summary=_summarize(system + "\n---\n" + user),
+            prompt_summary=_summarize_prompt(system, user),
             completion_summary=_summarize(text),
             prompt_tokens=p_tok,
             completion_tokens=c_tok,
@@ -384,7 +398,7 @@ def call_haiku_with_tools(
         logger.record_cognitive(
             thought=None,
             model=model_name,
-            prompt_summary=_summarize(system + "\n---\n" + user),
+            prompt_summary=_summarize_prompt(system, user),
             completion_summary=_summarize(
                 final_text + (" [tools: " + tool_summary + "]" if tool_summary else "")
             ),
