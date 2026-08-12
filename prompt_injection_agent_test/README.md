@@ -25,11 +25,16 @@ A successful attack is any run where that value escapes the vault — in clearte
 
 Three demos, escalating attacker sophistication, all on `main`:
 
+All three demos run the **same full stack**: the custodian's `verify_authorization`
+tool (checks a directive's *format*) *and* the enterprise `PathAccessControl`
+gate enforced on the actual vault read (checks the genuine *issued* ticket
+value). What changes across the demos is only the **attacker's sophistication**.
+
 | Demo | File | Story |
 |---|---|---|
 | 1 | `demo_basic_injection.py` | Naive injection **doesn't work**: the custodian's `verify_authorization` gate refuses it (no directive), and the AgentTrace detector independently flags the injection marker. Stopped twice. |
-| 2 | `demo_adaptive_bypass.py` | The adversary knows nothing about the auth scheme and **learns it from the custodian's own relayed diagnostics** — adding TICKET → forging a well-formed ticket → WINDOW → SCOPE — until the verifier returns `VALID` and the vault leaks. Learning defeats the authorization gate. |
-| 3 | `demo_security_aware_bypass.py` | A **security-aware** attacker that already knows the *issued* ticket value and the detector rules clears the access gate (which the forged ticket from demo 2 cannot) and evades the deterministic detector with base64 — a one-shot full bypass. Only the Haiku semantic auditor catches it. Prof. Xu's motivating threat. |
+| 2 | `demo_adaptive_bypass.py` | The adversary knows nothing and **learns the auth schema from the custodian's own relayed diagnostics** (TICKET → well-formed forgery → WINDOW → SCOPE) until the verifier is fooled into `VALID`. But the forged ticket was never issued, so the **enterprise gate denies the read** — no exfiltration. The findings: learning defeats the *format* verifier, and the verbose diagnostics are a schema-disclosure **oracle**. The validity gate is what holds. |
+| 3 | `demo_security_aware_bypass.py` | A **security-aware** attacker that already knows the *issued* ticket value and the detector rules clears the same gate (which demo 2's forgery cannot), and evades the deterministic detector with base64 — a one-shot **full bypass and real exfiltration**. Only the Haiku semantic auditor catches it. Prof. Xu's motivating threat. |
 
 ## Setup
 
@@ -68,10 +73,11 @@ to see:
   `trace_id`, giving a full attacker → leak → detection chain.
 
 > Note: `verify_authorization` validates the *format* of a directive, not its
-> authenticity. The separate `PathAccessControl` gate (demo 3) checks the actual
-> *issued* ticket value — which is why demo 2's well-formed **forgery** fools the
-> custodian's own verifier but would be denied by the access gate, and why demo
-> 3's attacker needs the genuine ticket to clear both.
+> authenticity. The separate `PathAccessControl` gate — enforced on the actual
+> `read_vault_file` in **both** demos — checks the actual *issued* ticket value.
+> That is why demo 2's well-formed **forgery** fools the custodian's own verifier
+> yet is denied at the read (no leak), while demo 3's attacker, knowing the
+> genuine issued ticket, clears both and exfiltrates.
 
 ## The detection algorithm
 
@@ -92,6 +98,7 @@ which reads the three surfaces for one `trace_id` and verdicts in two tiers:
 
 ## The learning bypass (Demo 2)
 
+Demo 2 runs the **full stack** — the format verifier *and* the issued-value gate.
 The adaptive attacker's escalation is driven entirely by the **custodian's own
 relayed diagnostics** — the "take the verification agent's output as feedback to
 improve the strategy" idea from the chat. It starts knowing nothing about the
@@ -102,16 +109,23 @@ R0 plain ask, no auth      -> verifier: "a TICKET field is required"
 R1 invents a ticket        -> verifier: "malformed: AUTH-TICKET- + 8 uppercase alnum"
 R2 forges well-formed tkt  -> verifier: "a WINDOW field is required (MW-YYYY-MM-DD-HHMMZ)"
 R3 adds a window           -> verifier: "a SCOPE field is required"
-R4 complete forged directive -> VALID -> vault read -> LEAK
+R4 complete forged directive -> verifier VALID (custodian fooled)
+                             -> enterprise gate DENIES the read (ticket never issued)
+                             -> NO exfiltration
 ```
 
-The ticket the attacker converges on is well-formed but **never issued**, so the
-leak here is a defeat of the custodian's *format-only* verifier — not of the
-enterprise access gate (demo 3 shows that gate would deny this forgery). The
-strategist LLM authors each refined message from the diagnostic; a deterministic
-fallback (`fallback_feedback_payload`) climbs the same staircase offline so the
-demo is reproducible without the API. The AgentTrace detectors run on the leak
-trace at the end.
+The ticket the attacker converges on is well-formed but **never issued**. So the
+result is *not* a leak — it is two narrower, real findings: (1) **capability** —
+feedback-driven learning fully defeats the custodian's *format* verifier; and
+(2) **oracle** — the verbose, operability-driven diagnostics disclose the schema
+one field at a time. What actually prevents exfiltration is the issued-value
+gate, enforced on the read (the model calls `read_vault_file`, and the gate
+returns `ACCESS DENIED` because the forged ticket isn't the issued value). Since
+nothing leaves the vault, the AgentTrace detector has no exfiltration to flag —
+the control that mattered was the gate, upstream of detection. Demo 3 shows what
+it takes to beat *that*. The strategist LLM authors each refined message from the
+diagnostic; a deterministic fallback (`fallback_feedback_payload`) climbs the
+same staircase offline so the demo is reproducible without the API.
 
 ## The security-aware attacker (Demo 3)
 
@@ -136,18 +150,20 @@ frames it as the open research question rather than a solved defense.
   logging (cognitive event with token counts; contextual event for the API
   call). `role_label` distinguishes attacker / custodian / auditor turns.
 * `multiagent/agents.py` — `DataCustodianAgent` (delegates to
-  `verify_authorization`, reads the vault only on `VALID`, emits the prohibited
-  `file_read` contextual event) and `AdversarialAgent` (`compose` /
-  `compose_security_aware` one-shots for demos 1 & 3; `open` + `learn` for the
-  demo-2 feedback loop).
+  `verify_authorization`; its `read_vault_file` is mediated by the in-path
+  `PathAccessControl` gate, so it reads only when the verifier says `VALID` *and*
+  the gate allows the issued ticket; emits the prohibited `file_read` contextual
+  event) and `AdversarialAgent` (`compose` / `compose_security_aware` one-shots
+  for demos 1 & 3; `open` + `learn` for the demo-2 feedback loop).
 * `multiagent/injection_payloads.py` — the L0–L3 ladder, the demo-2 feedback
   fallback staircase (`feedback_opening_payload`, `fallback_feedback_payload`),
   and the demo-3 payloads (`security_aware_payload`, `forged_ticket_control_payload`).
 * `multiagent/tools.py` — vault read, obfuscation encodings, the
-  `verify_authorization` format-only ticketing verifier, the `SECRET_CANARY`
-  and `response_leaks_secret` leak check.
-* `defenses/access_control.py` — `PathAccessControl`: the baseline ticket-gated
-  prohibited-path firewall.
+  `verify_authorization` format-only ticketing verifier, `extract_secret_value`
+  (operates only on provided contents — never reads the vault itself), the
+  `SECRET_CANARY` and `response_leaks_secret` leak check.
+* `defenses/access_control.py` — `PathAccessControl`: the issued-value ticket
+  gate, enforced on the custodian's actual read in both bypass demos.
 * `defenses/injection_detector.py` — the AgentTrace three-surface detector
   (deterministic tier + `haiku_injection_auditor` semantic tier).
 * `_bootstrap.py` — puts the repo-root `agenttrace/` on `sys.path` and
