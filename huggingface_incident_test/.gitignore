@@ -1,0 +1,10 @@
+# Never commit the real API key.
+.env
+
+# Python bytecode caches.
+__pycache__/
+*.pyc
+
+# Local scratch output from _check.py and the static test's synthetic trace.
+_check_out.txt
+trace_logs/_test_traces.jsonl
