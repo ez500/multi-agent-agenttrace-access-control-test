@@ -14,6 +14,7 @@ from .agents import (
     StepOutcome,
 )
 from .attack_steps import KILL_CHAIN, KillChainStep, chain_up_to
+from .learning import EvasionPlan, LeakReport, TraceLearner
 from .tools import (
     CLUSTER_CREDENTIAL,
     PROXY_ZERODAY,
@@ -41,6 +42,9 @@ __all__ = [
     "KILL_CHAIN",
     "KillChainStep",
     "chain_up_to",
+    "EvasionPlan",
+    "LeakReport",
+    "TraceLearner",
     "SOLUTIONS_CANARY",
     "SOLUTIONS_REPO_FILE",
     "PROXY_ZERODAY",
