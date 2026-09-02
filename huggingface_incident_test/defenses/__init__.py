@@ -9,6 +9,10 @@
   + timeline reconstruction from the three surfaces, plus a real-Haiku
   :func:`haiku_trajectory_auditor`) and :class:`AgentPolicyEnforcer` (preventive
   — inline halt before a boundary is crossed). Used by ``demo_agenttrace.py``.
+* :mod:`defenses.live_response` — the LIVE agent-layer control:
+  :class:`LiveTraceMonitor` streams the harness-emitted telemetry *during* the
+  run and actively responds (revoke credential / isolate agent) at machine
+  speed. Used by ``demo_live_response.py``.
 """
 
 from .perimeter import (
@@ -16,6 +20,16 @@ from .perimeter import (
     PerimeterMonitor,
     PerimeterVerdict,
     SandboxBoundary,
+)
+from .live_response import (
+    ALERT,
+    ISOLATE_AGENT,
+    OBSERVE,
+    REVOKE_CREDENTIAL,
+    SIGNALS,
+    LiveTraceMonitor,
+    MonitorSummary,
+    ResponseAction,
 )
 from .trajectory_detector import (
     AUTONOMY_SIGNATURES,
@@ -37,4 +51,12 @@ __all__ = [
     "PolicyDecision",
     "AUTONOMY_SIGNATURES",
     "haiku_trajectory_auditor",
+    "LiveTraceMonitor",
+    "ResponseAction",
+    "MonitorSummary",
+    "SIGNALS",
+    "OBSERVE",
+    "ALERT",
+    "REVOKE_CREDENTIAL",
+    "ISOLATE_AGENT",
 ]

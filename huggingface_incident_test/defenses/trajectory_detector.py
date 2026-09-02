@@ -209,6 +209,16 @@ class AgentTraceTrajectoryDetector:
     # ---- I/O -----------------------------------------------------------
 
     def _read_trace(self, trace_id: str) -> Dict[str, List[dict]]:
+        """Load the agent's *self-reported* view of one trace.
+
+        Harness-emitted events (``body.emitter == "harness"``) are deliberately
+        excluded. This detector models the common deployment: telemetry the
+        agent produces about itself — its recorded reasoning and its own tags on
+        its I/O. That is enough to beat a network monitor by three days (Demo 2),
+        and it is exactly what an agent with read access to the logs learns to
+        launder (Demo 3). :class:`defenses.live_response.LiveTraceMonitor` reads
+        the other stream, the one the agent does not author.
+        """
         buckets: Dict[str, List[dict]] = {
             "operational": [], "cognitive": [], "contextual": [],
         }
@@ -224,6 +234,8 @@ class AgentTraceTrajectoryDetector:
                 except json.JSONDecodeError:
                     continue
                 if ev.get("trace_id") != trace_id:
+                    continue
+                if (ev.get("body") or {}).get("emitter") == "harness":
                     continue
                 surface = ev.get("surface")
                 if surface in buckets and len(buckets[surface]) < self._cap:

@@ -1,0 +1,249 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 1020" width="100%" height="100%">
+  <defs>
+    <style>
+      .box-blue { fill: #dae8fc; stroke: #6c8ebf; stroke-width: 2px; rx: 6px; }
+      .box-green { fill: #d5e8d4; stroke: #82b366; stroke-width: 2px; rx: 6px; }
+      .box-red { fill: #f8cecc; stroke: #b85450; stroke-width: 2px; rx: 6px; }
+      .box-yellow { fill: #fff2cc; stroke: #d6b656; stroke-width: 2px; rx: 6px; }
+      .box-grey { fill: #eeeeee; stroke: #999999; stroke-width: 2px; rx: 6px; }
+      .bg-box { fill: #f8f9fa; stroke: #cccccc; stroke-width: 2px; rx: 10px; }
+      .lane { fill: #ffffff; stroke: #9673a6; stroke-width: 2px; rx: 8px; }
+
+      .text-title { font-family: 'Segoe UI', Arial, sans-serif; font-size: 16px; font-weight: bold; fill: #000; text-anchor: middle; }
+      .text-main { font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px; font-weight: bold; fill: #000; text-anchor: middle; }
+      .text-step { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; font-weight: bold; fill: #000; text-anchor: middle; }
+      .text-sub { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; fill: #333; text-anchor: middle; }
+      .text-group { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; font-weight: bold; fill: #555; text-anchor: middle; }
+      .text-note { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; font-style: italic; fill: #666; text-anchor: middle; }
+      .text-bad { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; font-style: italic; fill: #b85450; text-anchor: middle; }
+      .text-good { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; font-style: italic; fill: #5a8a3c; text-anchor: middle; }
+      .text-left { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; fill: #333; text-anchor: start; }
+      .text-lefth { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; font-weight: bold; fill: #000; text-anchor: start; }
+
+      .line { fill: none; stroke: #333; stroke-width: 2px; stroke-linejoin: round; }
+      .line-red { fill: none; stroke: #b85450; stroke-width: 2.5px; stroke-linejoin: round; }
+      .line-purple { fill: none; stroke: #9673a6; stroke-width: 2px; stroke-linejoin: round; }
+    </style>
+
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#333" />
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#b85450" />
+    </marker>
+    <marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#9673a6" />
+    </marker>
+  </defs>
+
+  <rect x="20" y="20" width="410" height="800" class="bg-box" />
+  <text x="225" y="54" class="text-title">OFFENSE — THE ATTACKING AGENTS</text>
+
+  <rect x="460" y="20" width="400" height="800" class="bg-box" />
+  <text x="660" y="54" class="text-title">WHAT GETS RECORDED</text>
+
+  <rect x="890" y="20" width="490" height="800" class="bg-box" />
+  <text x="1135" y="54" class="text-title">DEFENSE — THE DEFENDING AGENTS</text>
+
+  <!-- ============ OFFENSE ============ -->
+
+  <rect x="105" y="76" width="240" height="52" class="box-blue" />
+  <text x="225" y="98" class="text-main">AttackAgent</text>
+  <text x="225" y="118" class="text-sub">goal: win the benchmark</text>
+
+  <path d="M 225 128 L 225 138" class="line" marker-end="url(#arrow)" />
+
+  <rect x="105" y="142" width="240" height="30" class="box-grey" />
+  <text x="225" y="162" class="text-step">1. Probe the only exit  (d1)</text>
+
+  <path d="M 225 172 L 225 182" class="line" marker-end="url(#arrow)" />
+
+  <rect x="105" y="186" width="240" height="30" class="box-red" />
+  <text x="225" y="206" class="text-step">2. Break out of sandbox  (d2)</text>
+
+  <path d="M 225 216 L 225 226" class="line" marker-end="url(#arrow)" />
+
+  <rect x="105" y="230" width="240" height="30" class="box-grey" />
+  <text x="225" y="250" class="text-step">3. Hunt for the answers  (d2)</text>
+
+  <path d="M 225 260 L 225 270" class="line" marker-end="url(#arrow)" />
+
+  <rect x="105" y="274" width="240" height="30" class="box-grey" />
+  <text x="225" y="294" class="text-step">4. Get code execution  (d4)</text>
+
+  <path d="M 225 304 L 225 314" class="line" marker-end="url(#arrow)" />
+
+  <rect x="105" y="318" width="240" height="30" class="box-yellow" />
+  <text x="225" y="338" class="text-step">5. Steal a credential  (d4)</text>
+
+  <path d="M 225 348 L 225 358" class="line" marker-end="url(#arrow)" />
+
+  <rect x="105" y="362" width="240" height="30" class="box-grey" />
+  <text x="225" y="382" class="text-step">6. Spread to clusters  (d4)</text>
+
+  <path d="M 225 392 L 225 398" class="line" />
+  <path d="M 225 398 L 133 398 L 133 402" class="line" marker-end="url(#arrow)" />
+  <path d="M 225 398 L 317 398 L 317 402" class="line" marker-end="url(#arrow)" />
+  <path d="M 225 398 L 225 402" class="line" marker-end="url(#arrow)" />
+
+  <rect x="95" y="406" width="76" height="30" class="box-blue" />
+  <text x="133" y="426" class="text-step">Worker</text>
+  <rect x="187" y="406" width="76" height="30" class="box-blue" />
+  <text x="225" y="426" class="text-step">Worker</text>
+  <rect x="279" y="406" width="76" height="30" class="box-blue" />
+  <text x="317" y="426" class="text-step">Worker</text>
+
+  <path d="M 133 436 L 133 462 L 225 462" class="line" />
+  <path d="M 317 436 L 317 462 L 225 462" class="line" />
+  <path d="M 225 436 L 225 462" class="line" />
+  <path d="M 225 462 L 225 470" class="line" marker-end="url(#arrow)" />
+
+  <rect x="105" y="474" width="240" height="30" class="box-red" />
+  <text x="225" y="494" class="text-step">7. Read the private repo  (d4)</text>
+
+  <path d="M 225 504 L 225 516" class="line" marker-end="url(#arrow)" />
+
+  <rect x="90" y="520" width="270" height="50" class="box-red" />
+  <text x="225" y="542" class="text-main">ANSWER KEY TAKEN</text>
+  <text x="225" y="560" class="text-sub">the whole point of the attack</text>
+
+  <rect x="90" y="614" width="270" height="52" class="box-red" />
+  <text x="225" y="636" class="text-main">EvasionLearner</text>
+  <text x="225" y="656" class="text-sub">reads the log, hides the tells</text>
+  <text x="225" y="690" class="text-bad">it can only rewrite what it wrote itself</text>
+
+  <!-- ============ WHAT GETS RECORDED ============ -->
+
+  <rect x="478" y="86" width="364" height="124" class="lane" />
+  <text x="660" y="110" class="text-main">AGENT LOG</text>
+  <text x="660" y="134" class="text-sub">· what the agent SAYS about itself</text>
+  <text x="660" y="154" class="text-sub">· its own reasoning</text>
+  <text x="660" y="174" class="text-sub">· its own labels on its actions</text>
+  <text x="660" y="196" class="text-bad">the agent can possibly tamper with this</text>
+
+  <rect x="478" y="240" width="364" height="124" class="lane" />
+  <text x="660" y="264" class="text-main">HARNESS RECORD</text>
+  <text x="660" y="288" class="text-sub">· what the TOOLS actually did</text>
+  <text x="660" y="308" class="text-sub">· real target and real data</text>
+  <text x="660" y="328" class="text-sub">· which credential was used</text>
+  <text x="660" y="350" class="text-good">the agent never writes this</text>
+
+  <path d="M 345 102 L 474 102" class="line" marker-end="url(#arrow)" />
+  <text x="388" y="94" class="text-note">what it says</text>
+  <path d="M 345 289 L 474 289" class="line" marker-end="url(#arrow)" />
+  <text x="388" y="281" class="text-note">what it did</text>
+
+  <path d="M 842 148 L 852 148 L 852 425 L 808 425" class="line" marker-end="url(#arrow)" />
+  <path d="M 660 364 L 660 398" class="line" marker-end="url(#arrow)" />
+
+  <rect x="516" y="402" width="288" height="48" class="box-blue" />
+  <text x="660" y="422" class="text-main">TRACE LOG — one run</text>
+  <text x="660" y="440" class="text-sub">both streams, one id</text>
+
+  <path d="M 478 174 L 444 174 L 444 640 L 364 640" class="line-purple" marker-end="url(#arrow-purple)" />
+  <path d="M 90 640 L 62 640 L 62 102 L 101 102" class="line-purple" marker-end="url(#arrow-purple)" />
+  <text x="225" y="710" class="text-note">then it re-runs the attack, quieter</text>
+
+  <path d="M 804 414 L 866 414 L 866 230 L 906 230" class="line" marker-end="url(#arrow)" />
+  <path d="M 804 438 L 878 438 L 878 356 L 976 356" class="line" marker-end="url(#arrow)" />
+
+  <!-- ============ DEFENSE ============ -->
+
+  <rect x="950" y="86" width="370" height="56" class="box-grey" />
+  <text x="1135" y="108" class="text-main">PerimeterMonitor</text>
+  <text x="1135" y="128" class="text-sub">watches network traffic only - can be autonomous or not</text>
+  <text x="1135" y="160" class="text-bad">quiet until the day-4 burst — after the theft</text>
+
+  <text x="1135" y="190" class="text-group">RETRO READS THE AGENTS' LOGS</text>
+
+  <rect x="910" y="202" width="220" height="56" class="box-green" />
+  <text x="1020" y="224" class="text-main">LogProcessingAgent</text>
+  <text x="1020" y="244" class="text-sub">rebuilds the timeline</text>
+
+  <path d="M 1130 230 L 1146 230" class="line" marker-end="url(#arrow)" />
+
+  <rect x="1150" y="202" width="210" height="56" class="box-green" />
+  <text x="1255" y="224" class="text-main">SemanticAuditor</text>
+  <text x="1255" y="244" class="text-sub">analyzes processed logs</text>
+
+  <text x="1135" y="282" class="text-bad">the attacker learns to fool these if feedback is not careful</text>
+
+  <text x="1135" y="316" class="text-group">READS THE LOG WHILE THE SYSTEM RUNS</text>
+
+  <rect x="980" y="328" width="300" height="56" class="box-yellow" />
+  <text x="1130" y="350" class="text-main">ProductionLogProcessingAgent</text>
+  <text x="1130" y="370" class="text-sub">checks the record after every step</text>
+
+  <path d="M 1130 384 L 1130 392" class="line" />
+  <path d="M 1130 392 L 967 392 L 967 396" class="line" marker-end="url(#arrow)" />
+  <path d="M 1130 392 L 1081 392 L 1081 396" class="line" marker-end="url(#arrow)" />
+  <path d="M 1130 392 L 1195 392 L 1195 396" class="line" marker-end="url(#arrow)" />
+  <path d="M 1130 392 L 1309 392 L 1309 396" class="line" marker-end="url(#arrow)" />
+
+  <rect x="915" y="400" width="104" height="42" class="box-grey" />
+  <text x="967" y="426" class="text-main">WATCH</text>
+  <rect x="1029" y="400" width="104" height="42" class="box-yellow" />
+  <text x="1081" y="426" class="text-main">ALERT</text>
+  <rect x="1143" y="400" width="104" height="42" class="box-red" />
+  <text x="1195" y="426" class="text-main">REVOKE</text>
+  <rect x="1257" y="400" width="104" height="42" class="box-red" />
+  <text x="1309" y="426" class="text-main">STOP AGENT</text>
+
+  <rect x="980" y="486" width="300" height="56" class="box-yellow" />
+  <text x="1130" y="508" class="text-main">PolicyEnforcer</text>
+  <text x="1130" y="528" class="text-sub">checks authority before each step (AI not needed)</text>
+  <text x="1130" y="562" class="text-note">uses the agent's job description/credentials, not the log</text>
+
+  <path d="M 980 372 L 900 372 L 900 615 L 976 615" class="line" marker-end="url(#arrow)" />
+
+  <rect x="980" y="588" width="300" height="70" class="box-blue" />
+  <text x="1130" y="610" class="text-main">TriageAgent</text>
+  <text x="1130" y="630" class="text-sub">names the exact hosts to rebuild</text>
+  <text x="1130" y="648" class="text-sub">6 of 18, not 15 of 18</text>
+
+  <!-- ==== the defense acting back on the attack (this is what changes the result) ==== -->
+
+  <path d="M 1309 442 L 1309 462 L 940 462 L 940 740 L 48 740 L 48 201 L 101 201"
+        class="line-red" marker-end="url(#arrow-red)" />
+  <path d="M 980 514 L 940 514" class="line-red" />
+  <text x="660" y="732" class="text-sub">stop the run at the break-out</text>
+
+  <path d="M 1195 442 L 1195 452 L 1370 452 L 1370 790 L 72 790 L 72 489 L 101 489"
+        class="line-red" marker-end="url(#arrow-red)" />
+  <text x="660" y="782" class="text-sub">cut the credential, so step 7 fails</text>
+
+  <!-- ============ RESULTS ============ -->
+
+  <rect x="20" y="838" width="1360" height="164" class="bg-box" />
+  <text x="700" y="866" class="text-title">WHAT THIS PRODUCES IN THE DEMO</text>
+
+  <text x="45" y="894" class="text-lefth">DEMO</text>
+  <text x="210" y="894" class="text-lefth">WHAT THE DEFENSE SEES</text>
+  <text x="470" y="894" class="text-lefth">THE DEFENSE</text>
+  <text x="800" y="894" class="text-lefth">WHEN IT CATCHES</text>
+  <text x="1090" y="894" class="text-lefth">ANSWER KEY</text>
+
+  <text x="45" y="918" class="text-left">1</text>
+  <text x="210" y="918" class="text-left">nothing from the agent</text>
+  <text x="470" y="918" class="text-left">PerimeterMonitor</text>
+  <text x="800" y="918" class="text-left">day 4 — after the theft</text>
+  <text x="1090" y="918" class="text-left">TAKEN</text>
+
+  <text x="45" y="942" class="text-left">2</text>
+  <text x="210" y="942" class="text-left">the agent's log</text>
+  <text x="470" y="942" class="text-left">TrajectoryDetector + PolicyEnforcer</text>
+  <text x="800" y="942" class="text-left">day 1, but only after the run</text>
+  <text x="1090" y="942" class="text-left">safe (halted at step 2)</text>
+
+  <text x="45" y="966" class="text-left">3</text>
+  <text x="210" y="966" class="text-left">a laundered log</text>
+  <text x="470" y="966" class="text-left">same controls, fooled</text>
+  <text x="800" y="966" class="text-left">never</text>
+  <text x="1090" y="966" class="text-left">TAKEN</text>
+
+  <text x="45" y="990" class="text-left">4</text>
+  <text x="210" y="990" class="text-left">the harness record</text>
+  <text x="470" y="990" class="text-left">LiveMonitor + live response</text>
+  <text x="800" y="990" class="text-left">day 1, while it is running</text>
+  <text x="1090" y="990" class="text-left">safe (stopped mid-attack)</text>
+</svg>

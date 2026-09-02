@@ -153,6 +153,12 @@ class TraceLearner:
                     continue
                 if ev.get("trace_id") != trace_id:
                     continue
+                # The attacker can only launder what it authors. Harness-emitted
+                # events are written by the layer that executes its tool calls,
+                # so they are outside its control and it gains nothing by
+                # inspecting them for tells to suppress.
+                if (ev.get("body") or {}).get("emitter") == "harness":
+                    continue
                 surface = ev.get("surface")
                 if surface in buckets:
                     buckets[surface].append(ev)

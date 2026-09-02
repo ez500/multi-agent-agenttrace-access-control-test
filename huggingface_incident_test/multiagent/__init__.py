@@ -15,8 +15,17 @@ from .agents import (
 )
 from .attack_steps import KILL_CHAIN, KillChainStep, chain_up_to
 from .learning import EvasionPlan, LeakReport, TraceLearner
+from .noise import (
+    FLEET,
+    artifact_hosts_from_trace,
+    benign_artifact_hosts,
+    scatter_benchmark_artifacts,
+)
 from .tools import (
+    ACCESS_DENIED,
     CLUSTER_CREDENTIAL,
+    CREDENTIALS,
+    CredentialStore,
     PROXY_ZERODAY,
     SOLUTIONS_CANARY,
     SOLUTIONS_REPO_FILE,
@@ -49,6 +58,13 @@ __all__ = [
     "SOLUTIONS_REPO_FILE",
     "PROXY_ZERODAY",
     "CLUSTER_CREDENTIAL",
+    "CREDENTIALS",
+    "CredentialStore",
+    "ACCESS_DENIED",
+    "FLEET",
+    "benign_artifact_hosts",
+    "scatter_benchmark_artifacts",
+    "artifact_hosts_from_trace",
     "probe_egress_proxy",
     "exploit_proxy_zeroday",
     "chain_pipeline_rce",
