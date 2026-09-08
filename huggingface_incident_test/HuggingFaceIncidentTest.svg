@@ -189,7 +189,7 @@
   <rect x="1257" y="400" width="104" height="42" class="box-red" />
   <text x="1309" y="426" class="text-main">STOP AGENT</text>
 
-  <rect x="980" y="486" width="300" height="56" class="box-yellow" />
+  <rect x="950" y="486" width="360" height="56" class="box-yellow" />
   <text x="1130" y="508" class="text-main">PolicyEnforcer</text>
   <text x="1130" y="528" class="text-sub">checks authority before each step (AI not needed)</text>
   <text x="1130" y="562" class="text-note">uses the agent's job description/credentials, not the log</text>
@@ -205,7 +205,7 @@
 
   <path d="M 1309 442 L 1309 462 L 940 462 L 940 740 L 48 740 L 48 201 L 101 201"
         class="line-red" marker-end="url(#arrow-red)" />
-  <path d="M 980 514 L 940 514" class="line-red" />
+  <path d="M 950 514 L 940 514" class="line-red" />
   <text x="660" y="732" class="text-sub">stop the run at the break-out</text>
 
   <path d="M 1195 442 L 1195 452 L 1370 452 L 1370 790 L 72 790 L 72 489 L 101 489"
@@ -231,7 +231,7 @@
 
   <text x="45" y="942" class="text-left">2</text>
   <text x="210" y="942" class="text-left">the agent's log</text>
-  <text x="470" y="942" class="text-left">TrajectoryDetector + PolicyEnforcer</text>
+  <text x="470" y="942" class="text-left">LogProcessingAgent + PolicyEnforcer</text>
   <text x="800" y="942" class="text-left">day 1, but only after the run</text>
   <text x="1090" y="942" class="text-left">safe (halted at step 2)</text>
 
@@ -243,7 +243,7 @@
 
   <text x="45" y="990" class="text-left">4</text>
   <text x="210" y="990" class="text-left">the harness record</text>
-  <text x="470" y="990" class="text-left">LiveMonitor + live response</text>
+  <text x="470" y="990" class="text-left">ProductionLogProcessingAgent + response</text>
   <text x="800" y="990" class="text-left">day 1, while it is running</text>
   <text x="1090" y="990" class="text-left">safe (stopped mid-attack)</text>
 </svg>

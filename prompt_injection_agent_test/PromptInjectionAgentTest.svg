@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 680" width="100%" height="100%">
+  <defs>
+    <style>
+      .box-blue { fill: #dae8fc; stroke: #6c8ebf; stroke-width: 2px; rx: 6px; }
+      .box-green { fill: #d5e8d4; stroke: #82b366; stroke-width: 2px; rx: 6px; }
+      .box-red { fill: #f8cecc; stroke: #b85450; stroke-width: 2px; rx: 6px; }
+      .box-yellow { fill: #fff2cc; stroke: #d6b656; stroke-width: 2px; rx: 6px; }
+      .bg-box { fill: #f8f9fa; stroke: #cccccc; stroke-width: 2px; rx: 10px; }
+
+      .text-title { font-family: 'Segoe UI', Arial, sans-serif; font-size: 16px; font-weight: bold; fill: #000; text-anchor: middle; }
+      .text-main { font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px; font-weight: bold; fill: #000; text-anchor: middle; }
+      .text-sub { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; fill: #333; text-anchor: middle; }
+      .text-note { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; font-style: italic; fill: #666; text-anchor: middle; }
+
+      .line { fill: none; stroke: #333; stroke-width: 2px; stroke-linejoin: round; }
+      .line-red { fill: none; stroke: #b85450; stroke-width: 2.5px; stroke-linejoin: round; }
+    </style>
+
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#333" />
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#b85450" />
+    </marker>
+  </defs>
+
+  <rect x="20" y="20" width="470" height="640" class="bg-box" />
+  <text x="255" y="52" class="text-title">ATTACK PIPELINE (DEMOS 1-3)</text>
+
+  <rect x="520" y="20" width="460" height="640" class="bg-box" />
+  <text x="750" y="52" class="text-title">AGENTTRACE DETECTION</text>
+
+  <!-- ===== left column: attacker -> custodian -> gates -> outcome ===== -->
+
+  <text x="230" y="74" class="text-note">learns the auth schema from the refusals</text>
+
+  <rect x="120" y="84" width="220" height="52" class="box-blue" />
+  <text x="230" y="106" class="text-main">[ InternalAdversarialAgent ]</text>
+  <text x="230" y="126" class="text-sub">(compose / learn loop)</text>
+
+  <path d="M 230 136 L 230 164" class="line" marker-end="url(#arrow)" />
+  <text x="320" y="156" class="text-sub">(injection payload)</text>
+
+  <rect x="120" y="168" width="220" height="52" class="box-blue" />
+  <text x="230" y="190" class="text-main">[ DeferralAgent ]</text>
+  <text x="230" y="210" class="text-sub">(checks authentication)</text>
+
+  <path d="M 230 220 L 230 248" class="line" marker-end="url(#arrow)" />
+
+  <rect x="120" y="252" width="220" height="52" class="box-yellow" />
+  <text x="230" y="274" class="text-main">verify_authorization()</text>
+  <text x="230" y="294" class="text-sub">(format check only)</text>
+
+  <path d="M 230 304 L 230 318" class="line" />
+  <path d="M 230 318 L 110 318 L 110 326" class="line" marker-end="url(#arrow)" />
+  <path d="M 230 318 L 230 384" class="line" marker-end="url(#arrow)" />
+  <text x="172" y="311" class="text-sub">INVALID</text>
+  <text x="268" y="358" class="text-sub">VALID</text>
+
+  <rect x="40" y="330" width="140" height="52" class="box-red" />
+  <text x="110" y="352" class="text-main">REFUSAL +</text>
+  <text x="110" y="372" class="text-main">DIAGNOSTIC</text>
+  <text x="88" y="398" class="text-note">demos 1-2</text>
+
+  <path d="M 40 356 L 30 356 L 30 110 L 116 110" class="line-red" marker-end="url(#arrow-red)" />
+  <text x="78" y="240" class="text-sub">(diagnostic</text>
+  <text x="78" y="256" class="text-sub">-&gt; learn)</text>
+
+  <rect x="120" y="388" width="220" height="52" class="box-yellow" />
+  <text x="230" y="410" class="text-main">PathAccessControl</text>
+  <text x="230" y="430" class="text-sub">(issued-ticket gate)</text>
+
+  <path d="M 230 440 L 230 462" class="line" />
+  <path d="M 230 462 L 110 462 L 110 486" class="line" marker-end="url(#arrow)" />
+  <path d="M 230 462 L 350 462 L 350 486" class="line" marker-end="url(#arrow)" />
+  <text x="170" y="455" class="text-sub">DENY</text>
+  <text x="292" y="455" class="text-sub">ALLOW</text>
+
+  <rect x="40" y="490" width="140" height="52" class="box-red" />
+  <text x="110" y="512" class="text-main">ACCESS DENIED</text>
+  <text x="110" y="530" class="text-sub">(forged ticket)</text>
+
+  <rect x="280" y="490" width="140" height="52" class="box-blue" />
+  <text x="350" y="512" class="text-main">read_vault_file</text>
+  <text x="350" y="530" class="text-sub">(canary)</text>
+
+  <path d="M 350 542 L 350 566" class="line" marker-end="url(#arrow)" />
+
+  <rect x="240" y="570" width="220" height="52" class="box-red" />
+  <text x="350" y="592" class="text-main">SECRET EXFILTRATED</text>
+  <text x="350" y="610" class="text-sub">(plain or base64)</text>
+  <text x="350" y="640" class="text-note">demo 3 only</text>
+
+  <!-- ===== instrumentation bus: every hop lands on the three surfaces ===== -->
+
+  <path d="M 340 110 L 505 110" class="line" />
+  <path d="M 340 194 L 505 194" class="line" />
+  <path d="M 340 278 L 505 278" class="line" />
+  <path d="M 340 414 L 505 414" class="line" />
+  <path d="M 420 516 L 505 516" class="line" />
+  <path d="M 460 596 L 505 596" class="line" />
+
+  <path d="M 505 110 L 505 596" class="line" />
+
+  <path d="M 505 121 L 636 121" class="line" marker-end="url(#arrow)" />
+  <path d="M 505 171 L 636 171" class="line" marker-end="url(#arrow)" />
+  <path d="M 505 221 L 636 221" class="line" marker-end="url(#arrow)" />
+
+  <!-- ===== right column: three surfaces -> trace -> two detector tiers ===== -->
+
+  <rect x="640" y="104" width="220" height="34" class="box-green" />
+  <text x="750" y="126" class="text-main">OPERATIONAL SURFACE</text>
+
+  <rect x="640" y="154" width="220" height="34" class="box-green" />
+  <text x="750" y="176" class="text-main">COGNITIVE SURFACE</text>
+
+  <rect x="640" y="204" width="220" height="34" class="box-green" />
+  <text x="750" y="226" class="text-main">CONTEXTUAL SURFACE</text>
+
+  <path d="M 750 238 L 750 270" class="line" marker-end="url(#arrow)" />
+
+  <rect x="640" y="274" width="220" height="48" class="box-blue" />
+  <text x="750" y="294" class="text-main">trace_logs/traces.jsonl</text>
+  <text x="750" y="312" class="text-sub">(one trace_id)</text>
+
+  <path d="M 750 322 L 750 336 L 585 336 L 585 458 L 606 458" class="line" marker-end="url(#arrow)" />
+  <path d="M 750 336 L 750 350" class="line" marker-end="url(#arrow)" />
+
+  <rect x="610" y="354" width="280" height="56" class="box-green" />
+  <text x="750" y="376" class="text-main">DeterministicAuditor</text>
+  <text x="750" y="396" class="text-sub">(marker phrase, plaintext canary, no AI)</text>
+
+  <rect x="610" y="430" width="280" height="56" class="box-green" />
+  <text x="750" y="452" class="text-main">SemanticAuditor</text>
+  <text x="750" y="472" class="text-sub">(log processor, catches base64)</text>
+
+  <path d="M 890 382 L 940 382 L 940 558 L 874 558" class="line" marker-end="url(#arrow)" />
+  <path d="M 750 486 L 750 526" class="line" marker-end="url(#arrow)" />
+
+  <rect x="630" y="530" width="240" height="56" class="box-blue" />
+  <text x="750" y="552" class="text-main">[ DETECTION VERDICT ]</text>
+  <text x="750" y="572" class="text-sub">(logged back as cognitive)</text>
+
+  <path d="M 630 558 L 560 558 L 560 298 L 636 298" class="line" marker-end="url(#arrow)" />
+
+  <path d="M 700 586 L 700 636 L 480 636 L 480 610 L 462 610" class="line-red" marker-end="url(#arrow-red)" />
+  <text x="612" y="630" class="text-sub">(semantic auditor flags)</text>
+
+</svg>
