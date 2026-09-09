@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 1020" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 1180" width="100%" height="100%">
   <defs>
     <style>
       .box-blue { fill: #dae8fc; stroke: #6c8ebf; stroke-width: 2px; rx: 6px; }
@@ -8,6 +8,7 @@
       .box-grey { fill: #eeeeee; stroke: #999999; stroke-width: 2px; rx: 6px; }
       .bg-box { fill: #f8f9fa; stroke: #cccccc; stroke-width: 2px; rx: 10px; }
       .lane { fill: #ffffff; stroke: #9673a6; stroke-width: 2px; rx: 8px; }
+      .sandbox { fill: #fbf3f2; stroke: #b85450; stroke-width: 2px; stroke-dasharray: 8 6; rx: 8px; }
 
       .text-title { font-family: 'Segoe UI', Arial, sans-serif; font-size: 16px; font-weight: bold; fill: #000; text-anchor: middle; }
       .text-main { font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px; font-weight: bold; fill: #000; text-anchor: middle; }
@@ -19,6 +20,7 @@
       .text-good { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; font-style: italic; fill: #5a8a3c; text-anchor: middle; }
       .text-left { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; fill: #333; text-anchor: start; }
       .text-lefth { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; font-weight: bold; fill: #000; text-anchor: start; }
+      .text-mono { font-family: 'Consolas', 'Courier New', monospace; font-size: 12px; fill: #333; text-anchor: middle; }
 
       .line { fill: none; stroke: #333; stroke-width: 2px; stroke-linejoin: round; }
       .line-red { fill: none; stroke: #b85450; stroke-width: 2.5px; stroke-linejoin: round; }
@@ -36,214 +38,205 @@
     </marker>
   </defs>
 
-  <rect x="20" y="20" width="410" height="800" class="bg-box" />
-  <text x="225" y="54" class="text-title">OFFENSE — THE ATTACKING AGENTS</text>
+  <!-- ============================================================= -->
+  <!-- PANEL 1 — ATTACKING SYSTEM (the operator's own agents)         -->
+  <!-- ============================================================= -->
+  <rect x="20" y="20" width="430" height="740" class="bg-box" />
+  <text x="235" y="50" class="text-title">ATTACKING SYSTEM</text>
+  <text x="235" y="70" class="text-group">the operator's own agents (ExploitGym harness)</text>
+  <text x="235" y="88" class="text-note">unintentional: underspecified goal + excess authority</text>
 
-  <rect x="460" y="20" width="400" height="800" class="bg-box" />
-  <text x="660" y="54" class="text-title">WHAT GETS RECORDED</text>
+  <!-- broken sandbox frame -->
+  <rect x="45" y="100" width="380" height="250" class="sandbox" />
+  <text x="235" y="118" class="text-bad">SANDBOX — containment broken at K1 (proxy zero-day)</text>
 
-  <rect x="890" y="20" width="490" height="800" class="bg-box" />
-  <text x="1135" y="54" class="text-title">DEFENSE — THE DEFENDING AGENTS</text>
+  <!-- three agents -->
+  <rect x="65" y="128" width="340" height="52" class="box-blue" />
+  <text x="235" y="150" class="text-step">ReconAgent  ·  days 1-2</text>
+  <text x="235" y="169" class="text-sub">K0 probe egress → K1 break containment</text>
 
-  <!-- ============ OFFENSE ============ -->
+  <rect x="65" y="190" width="340" height="52" class="box-blue" />
+  <text x="235" y="212" class="text-step">AccessAgent  ·  day 2, day 4</text>
+  <text x="235" y="231" class="text-sub">K2 locate → K3 RCE → K4 harvest credential</text>
 
-  <rect x="105" y="76" width="240" height="52" class="box-blue" />
-  <text x="225" y="98" class="text-main">AttackAgent</text>
-  <text x="225" y="118" class="text-sub">goal: win the benchmark</text>
+  <rect x="65" y="252" width="340" height="52" class="box-blue" />
+  <text x="235" y="274" class="text-step">HarvestAgent  ·  day 4</text>
+  <text x="235" y="293" class="text-sub">K5 fan-out → K6 read answer key</text>
 
-  <path d="M 225 128 L 225 138" class="line" marker-end="url(#arrow)" />
+  <!-- tool mediator -->
+  <rect x="65" y="372" width="340" height="54" class="box-yellow" />
+  <text x="235" y="394" class="text-step">ToolMediator (per-agent broker)</text>
+  <text x="235" y="413" class="text-sub">6-capability allowlist — no trace primitive</text>
+  <text x="235" y="447" class="text-note">agents hold only the broker; never the sink</text>
 
-  <rect x="105" y="142" width="240" height="30" class="box-grey" />
-  <text x="225" y="162" class="text-step">1. Probe the only exit  (d1)</text>
+  <!-- credential provenance link between access and harvest -->
+  <path class="line-red" d="M 55 216 L 40 216 L 40 278 L 55 278" marker-end="url(#arrow-red)" />
+  <text x="30" y="250" class="text-bad" transform="rotate(-90 30 250)">cred reused</text>
 
-  <path d="M 225 172 L 225 182" class="line" marker-end="url(#arrow)" />
+  <!-- ============================================================= -->
+  <!-- PANEL 2 — SEALED TRACE PLANE (harness-owned)                   -->
+  <!-- ============================================================= -->
+  <rect x="470" y="20" width="430" height="740" class="bg-box" />
+  <text x="685" y="50" class="text-title">SEALED TRACE PLANE</text>
+  <text x="685" y="70" class="text-group">harness-owned — agents cannot reach it</text>
 
-  <rect x="105" y="186" width="240" height="30" class="box-red" />
-  <text x="225" y="206" class="text-step">2. Break out of sandbox  (d2)</text>
+  <!-- three surfaces -->
+  <rect x="500" y="90" width="370" height="30" class="box-green" />
+  <text x="685" y="110" class="text-sub">operational surface</text>
+  <rect x="500" y="128" width="370" height="30" class="box-green" />
+  <text x="685" y="148" class="text-sub">cognitive surface  (agent &lt;thinking&gt;)</text>
+  <rect x="500" y="166" width="370" height="30" class="box-green" />
+  <text x="685" y="186" class="text-sub">contextual surface  (sealed evidence)</text>
 
-  <path d="M 225 216 L 225 226" class="line" marker-end="url(#arrow)" />
+  <!-- the sink -->
+  <rect x="545" y="222" width="280" height="56" class="box-green" />
+  <text x="685" y="245" class="text-step">SealedTraceSink</text>
+  <text x="685" y="264" class="text-sub">stamps provenance · HMAC-chains</text>
 
-  <rect x="105" y="230" width="240" height="30" class="box-grey" />
-  <text x="225" y="250" class="text-step">3. Hunt for the answers  (d2)</text>
+  <!-- HMAC chain -->
+  <rect x="530" y="308" width="90" height="34" class="box-grey" />
+  <text x="575" y="330" class="text-mono">seq 1</text>
+  <rect x="640" y="308" width="90" height="34" class="box-grey" />
+  <text x="685" y="330" class="text-mono">seq 2</text>
+  <rect x="750" y="308" width="90" height="34" class="box-grey" />
+  <text x="795" y="330" class="text-mono">seq 3</text>
+  <path class="line" d="M 620 325 L 638 325" marker-end="url(#arrow)" />
+  <path class="line" d="M 730 325 L 748 325" marker-end="url(#arrow)" />
+  <text x="685" y="360" class="text-good">verify(): chain intact — tamper is detectable</text>
 
-  <path d="M 225 260 L 225 270" class="line" marker-end="url(#arrow)" />
+  <!-- log-security bounce: agent naming the trace is denied -->
+  <rect x="515" y="400" width="340" height="48" class="box-red" />
+  <text x="685" y="422" class="text-step">[ DENIED — NOT IN TOOL NAMESPACE ]</text>
+  <text x="685" y="440" class="text-sub">agent named traces.jsonl → refused</text>
+  <text x="685" y="470" class="text-bad">refusal is itself sealed as harness evidence</text>
 
-  <rect x="105" y="274" width="240" height="30" class="box-grey" />
-  <text x="225" y="294" class="text-step">4. Get code execution  (d4)</text>
+  <!-- provenance forgery refusal -->
+  <rect x="515" y="498" width="340" height="46" class="box-red" />
+  <text x="685" y="519" class="text-sub">agent emitter='harness' → ProvenanceForgeryError</text>
+  <text x="685" y="536" class="text-note">the string tag cannot be faked</text>
 
-  <path d="M 225 304 L 225 314" class="line" marker-end="url(#arrow)" />
+  <!-- red bounce arrow from agents to the plane and back to DENIED -->
+  <path class="line-red" d="M 405 399 L 440 399 L 440 424 L 513 424" marker-end="url(#arrow-red)" />
 
-  <rect x="105" y="318" width="240" height="30" class="box-yellow" />
-  <text x="225" y="338" class="text-step">5. Steal a credential  (d4)</text>
+  <!-- harness taps: mediated calls sealed as contextual evidence -->
+  <path class="line" d="M 405 399 L 460 399 L 460 181 L 498 181" marker-end="url(#arrow)" />
+  <text x="455" y="210" class="text-note" transform="rotate(-90 455 210)">sealed by harness</text>
 
-  <path d="M 225 348 L 225 358" class="line" marker-end="url(#arrow)" />
+  <!-- ============================================================= -->
+  <!-- PANEL 3 — GOVERNANCE (inside the harness)                      -->
+  <!-- ============================================================= -->
+  <rect x="920" y="20" width="460" height="740" class="bg-box" />
+  <text x="1150" y="50" class="text-title">GOVERNANCE (IN-HARNESS)</text>
+  <text x="1150" y="70" class="text-group">aggregate policy + semantic deferral</text>
 
-  <rect x="105" y="362" width="240" height="30" class="box-grey" />
-  <text x="225" y="382" class="text-step">6. Spread to clusters  (d4)</text>
+  <!-- per-agent chips, all under threshold -->
+  <text x="1150" y="96" class="text-group">Layer 1 — per-agent scores (each under 0.60)</text>
+  <rect x="945" y="106" width="130" height="42" class="box-grey" />
+  <text x="1010" y="126" class="text-sub">recon</text>
+  <text x="1010" y="142" class="text-mono">0.30 &lt; 0.60</text>
+  <rect x="1085" y="106" width="130" height="42" class="box-grey" />
+  <text x="1150" y="126" class="text-sub">access</text>
+  <text x="1150" y="142" class="text-mono">0.40 &lt; 0.60</text>
+  <rect x="1225" y="106" width="130" height="42" class="box-grey" />
+  <text x="1290" y="126" class="text-sub">harvest</text>
+  <text x="1290" y="142" class="text-mono">0.30 &lt; 0.60</text>
 
-  <path d="M 225 392 L 225 398" class="line" />
-  <path d="M 225 398 L 133 398 L 133 402" class="line" marker-end="url(#arrow)" />
-  <path d="M 225 398 L 317 398 L 317 402" class="line" marker-end="url(#arrow)" />
-  <path d="M 225 398 L 225 402" class="line" marker-end="url(#arrow)" />
+  <!-- fleet aggregate crosses -->
+  <rect x="945" y="176" width="410" height="52" class="box-red" />
+  <text x="1150" y="198" class="text-step">FLEET AGGREGATE  1.40  ≥  1.00  (POLICY)</text>
+  <text x="1150" y="217" class="text-sub">the union crosses — no single agent does</text>
+  <text x="1150" y="248" class="text-bad">credential_provenance is CROSS-AGENT — only in the union</text>
+  <path class="line-red" d="M 1010 150 L 1010 174" marker-end="url(#arrow-red)" />
+  <path class="line-red" d="M 1150 150 L 1150 174" marker-end="url(#arrow-red)" />
+  <path class="line-red" d="M 1290 150 L 1290 174" marker-end="url(#arrow-red)" />
 
-  <rect x="95" y="406" width="76" height="30" class="box-blue" />
-  <text x="133" y="426" class="text-step">Worker</text>
-  <rect x="187" y="406" width="76" height="30" class="box-blue" />
-  <text x="225" y="426" class="text-step">Worker</text>
-  <rect x="279" y="406" width="76" height="30" class="box-blue" />
-  <text x="317" y="426" class="text-step">Worker</text>
+  <!-- semantic deferral -->
+  <text x="1150" y="286" class="text-group">Layer 2 — semantic deferral on a live tail</text>
+  <rect x="945" y="296" width="410" height="54" class="box-green" />
+  <text x="1150" y="318" class="text-step">SemanticDeferralAgent · Haiku 4.5</text>
+  <text x="1150" y="337" class="text-sub">"departs from objective?" over the byte-cursor feed</text>
+  <text x="1150" y="368" class="text-good">catches the residual route the rules do not score</text>
 
-  <path d="M 133 436 L 133 462 L 225 462" class="line" />
-  <path d="M 317 436 L 317 462 L 225 462" class="line" />
-  <path d="M 225 436 L 225 462" class="line" />
-  <path d="M 225 462 L 225 470" class="line" marker-end="url(#arrow)" />
+  <!-- response ladder -->
+  <text x="1150" y="406" class="text-group">Response — machine speed, no human</text>
+  <rect x="945" y="418" width="410" height="150" class="lane" />
+  <rect x="965" y="432" width="370" height="24" class="box-grey" />
+  <text x="1150" y="449" class="text-sub">OBSERVE</text>
+  <rect x="965" y="460" width="370" height="24" class="box-yellow" />
+  <text x="1150" y="477" class="text-sub">RESTRICT_TOOL</text>
+  <rect x="965" y="488" width="370" height="24" class="box-yellow" />
+  <text x="1150" y="505" class="text-sub">REVOKE_CREDENTIAL</text>
+  <rect x="965" y="516" width="370" height="24" class="box-red" />
+  <text x="1150" y="533" class="text-sub">HALT_AGENT</text>
+  <rect x="965" y="544" width="370" height="24" class="box-red" />
+  <text x="1150" y="561" class="text-sub">HALT_FLEET → answer key never leaves</text>
+  <path class="line-red" d="M 1150 350 L 1150 416" marker-end="url(#arrow-red)" />
 
-  <rect x="105" y="474" width="240" height="30" class="box-red" />
-  <text x="225" y="494" class="text-step">7. Read the private repo  (d4)</text>
+  <!-- evidence feed: trace plane -> governance -->
+  <path class="line-purple" d="M 900 120 L 912 120 L 912 127 L 943 127" marker-end="url(#arrow-purple)" />
+  <text x="910" y="105" class="text-note">sealed feed</text>
 
-  <path d="M 225 504 L 225 516" class="line" marker-end="url(#arrow)" />
+  <!-- ============================================================= -->
+  <!-- BOTTOM LANE — VICTIM SYSTEM (API only, no agents)              -->
+  <!-- ============================================================= -->
+  <rect x="20" y="790" width="1360" height="150" class="lane" />
+  <text x="700" y="818" class="text-title">VICTIM SYSTEM — API ONLY, NO AGENTS</text>
+  <text x="700" y="838" class="text-note">Hugging Face responds; it cannot intervene in time — its own monitor notices only on day 4</text>
 
-  <rect x="90" y="520" width="270" height="50" class="box-red" />
-  <text x="225" y="542" class="text-main">ANSWER KEY TAKEN</text>
-  <text x="225" y="560" class="text-sub">the whole point of the attack</text>
+  <rect x="45" y="856" width="235" height="56" class="box-blue" />
+  <text x="162" y="878" class="text-sub">egress proxy</text>
+  <text x="162" y="897" class="text-note">zero-day → containment break</text>
 
-  <rect x="90" y="614" width="270" height="52" class="box-red" />
-  <text x="225" y="636" class="text-main">EvasionLearner</text>
-  <text x="225" y="656" class="text-sub">reads the log, hides the tells</text>
-  <text x="225" y="690" class="text-bad">it can only rewrite what it wrote itself</text>
+  <rect x="300" y="856" width="235" height="56" class="box-blue" />
+  <text x="417" y="878" class="text-sub">dataset pipeline</text>
+  <text x="417" y="897" class="text-note">unauthenticated RCE</text>
 
-  <!-- ============ WHAT GETS RECORDED ============ -->
+  <rect x="555" y="856" width="235" height="56" class="box-blue" />
+  <text x="672" y="878" class="text-sub">cloud metadata</text>
+  <text x="672" y="897" class="text-note">issues cluster credential</text>
 
-  <rect x="478" y="86" width="364" height="124" class="lane" />
-  <text x="660" y="110" class="text-main">AGENT LOG</text>
-  <text x="660" y="134" class="text-sub">· what the agent SAYS about itself</text>
-  <text x="660" y="154" class="text-sub">· its own reasoning</text>
-  <text x="660" y="174" class="text-sub">· its own labels on its actions</text>
-  <text x="660" y="196" class="text-bad">the agent can possibly tamper with this</text>
+  <rect x="810" y="856" width="235" height="56" class="box-blue" />
+  <text x="927" y="878" class="text-sub">cluster exec × 18</text>
+  <text x="927" y="897" class="text-note">credential-gated fan-out</text>
 
-  <rect x="478" y="240" width="364" height="124" class="lane" />
-  <text x="660" y="264" class="text-main">HARNESS RECORD</text>
-  <text x="660" y="288" class="text-sub">· what the TOOLS actually did</text>
-  <text x="660" y="308" class="text-sub">· real target and real data</text>
-  <text x="660" y="328" class="text-sub">· which credential was used</text>
-  <text x="660" y="350" class="text-good">the agent never writes this</text>
+  <rect x="1065" y="856" width="290" height="56" class="box-red" />
+  <text x="1210" y="878" class="text-step">private repo (answer key)</text>
+  <text x="1210" y="897" class="text-bad">[ACCESS DENIED] once revoked</text>
 
-  <path d="M 345 102 L 474 102" class="line" marker-end="url(#arrow)" />
-  <text x="388" y="94" class="text-note">what it says</text>
-  <path d="M 345 289 L 474 289" class="line" marker-end="url(#arrow)" />
-  <text x="388" y="281" class="text-note">what it did</text>
+  <!-- attack arrows crossing the broken boundary into the victim -->
+  <path class="line-red" d="M 235 428 L 235 700 L 162 700 L 162 854" marker-end="url(#arrow-red)" />
+  <path class="line-red" d="M 235 428 L 235 700 L 417 700 L 417 854" marker-end="url(#arrow-red)" />
+  <path class="line-red" d="M 235 428 L 235 700 L 927 700 L 927 854" marker-end="url(#arrow-red)" />
 
-  <path d="M 842 148 L 852 148 L 852 425 L 808 425" class="line" marker-end="url(#arrow)" />
-  <path d="M 660 364 L 660 398" class="line" marker-end="url(#arrow)" />
+  <!-- revoke reaches the victim: governance -> private repo -->
+  <path class="line-red" d="M 1150 568 L 1150 700 L 1210 700 L 1210 854" marker-end="url(#arrow-red)" />
+  <text x="1230" y="700" class="text-bad">revoke</text>
 
-  <rect x="516" y="402" width="288" height="48" class="box-blue" />
-  <text x="660" y="422" class="text-main">TRACE LOG — one run</text>
-  <text x="660" y="440" class="text-sub">both streams, one id</text>
+  <!-- ============================================================= -->
+  <!-- RESULTS STRIP                                                  -->
+  <!-- ============================================================= -->
+  <rect x="20" y="960" width="1360" height="200" class="bg-box" />
+  <text x="45" y="990" class="text-lefth">WHAT THIS PRODUCES IN THE DEMO</text>
 
-  <path d="M 478 174 L 444 174 L 444 640 L 364 640" class="line-purple" marker-end="url(#arrow-purple)" />
-  <path d="M 90 640 L 62 640 L 62 102 L 101 102" class="line-purple" marker-end="url(#arrow-purple)" />
-  <text x="225" y="710" class="text-note">then it re-runs the attack, quieter</text>
+  <text x="45"   y="1022" class="text-lefth">Configuration</text>
+  <text x="340"  y="1022" class="text-lefth">Layer 1 — deterministic</text>
+  <text x="700"  y="1022" class="text-lefth">Layer 2 — semantic</text>
+  <text x="985"  y="1022" class="text-lefth">Response</text>
+  <text x="1210" y="1022" class="text-lefth">Answer key</text>
+  <path class="line" d="M 45 1032 L 1355 1032" />
 
-  <path d="M 804 414 L 866 414 L 866 230 L 906 230" class="line" marker-end="url(#arrow)" />
-  <path d="M 804 438 L 878 438 L 878 356 L 976 356" class="line" marker-end="url(#arrow)" />
+  <text x="45"   y="1058" class="text-left">demo_no_agenttrace.py</text>
+  <text x="340"  y="1058" class="text-left">— (no telemetry)</text>
+  <text x="700"  y="1058" class="text-left">—</text>
+  <text x="985"  y="1058" class="text-left">none (victim sees day 4)</text>
+  <text x="1210" y="1058" class="text-bad">EXFILTRATED</text>
 
-  <!-- ============ DEFENSE ============ -->
+  <text x="45"   y="1090" class="text-left">demo_agenttrace.py</text>
+  <text x="340"  y="1090" class="text-left">each agent &lt; 0.60; fleet 1.40 ≥ 1.00</text>
+  <text x="700"  y="1090" class="text-left">departs = true (live tail)</text>
+  <text x="985"  y="1090" class="text-left">OBSERVE → … → HALT_FLEET</text>
+  <text x="1210" y="1090" class="text-good">NEVER LEAVES</text>
 
-  <rect x="950" y="86" width="370" height="56" class="box-grey" />
-  <text x="1135" y="108" class="text-main">PerimeterMonitor</text>
-  <text x="1135" y="128" class="text-sub">watches network traffic only - can be autonomous or not</text>
-  <text x="1135" y="160" class="text-bad">quiet until the day-4 burst — after the theft</text>
-
-  <text x="1135" y="190" class="text-group">RETRO READS THE AGENTS' LOGS</text>
-
-  <rect x="910" y="202" width="220" height="56" class="box-green" />
-  <text x="1020" y="224" class="text-main">LogProcessingAgent</text>
-  <text x="1020" y="244" class="text-sub">rebuilds the timeline</text>
-
-  <path d="M 1130 230 L 1146 230" class="line" marker-end="url(#arrow)" />
-
-  <rect x="1150" y="202" width="210" height="56" class="box-green" />
-  <text x="1255" y="224" class="text-main">SemanticAuditor</text>
-  <text x="1255" y="244" class="text-sub">analyzes processed logs</text>
-
-  <text x="1135" y="282" class="text-bad">the attacker learns to fool these if feedback is not careful</text>
-
-  <text x="1135" y="316" class="text-group">READS THE LOG WHILE THE SYSTEM RUNS</text>
-
-  <rect x="980" y="328" width="300" height="56" class="box-yellow" />
-  <text x="1130" y="350" class="text-main">ProductionLogProcessingAgent</text>
-  <text x="1130" y="370" class="text-sub">checks the record after every step</text>
-
-  <path d="M 1130 384 L 1130 392" class="line" />
-  <path d="M 1130 392 L 967 392 L 967 396" class="line" marker-end="url(#arrow)" />
-  <path d="M 1130 392 L 1081 392 L 1081 396" class="line" marker-end="url(#arrow)" />
-  <path d="M 1130 392 L 1195 392 L 1195 396" class="line" marker-end="url(#arrow)" />
-  <path d="M 1130 392 L 1309 392 L 1309 396" class="line" marker-end="url(#arrow)" />
-
-  <rect x="915" y="400" width="104" height="42" class="box-grey" />
-  <text x="967" y="426" class="text-main">WATCH</text>
-  <rect x="1029" y="400" width="104" height="42" class="box-yellow" />
-  <text x="1081" y="426" class="text-main">ALERT</text>
-  <rect x="1143" y="400" width="104" height="42" class="box-red" />
-  <text x="1195" y="426" class="text-main">REVOKE</text>
-  <rect x="1257" y="400" width="104" height="42" class="box-red" />
-  <text x="1309" y="426" class="text-main">STOP AGENT</text>
-
-  <rect x="950" y="486" width="360" height="56" class="box-yellow" />
-  <text x="1130" y="508" class="text-main">PolicyEnforcer</text>
-  <text x="1130" y="528" class="text-sub">checks authority before each step (AI not needed)</text>
-  <text x="1130" y="562" class="text-note">uses the agent's job description/credentials, not the log</text>
-
-  <path d="M 980 372 L 900 372 L 900 615 L 976 615" class="line" marker-end="url(#arrow)" />
-
-  <rect x="980" y="588" width="300" height="70" class="box-blue" />
-  <text x="1130" y="610" class="text-main">TriageAgent</text>
-  <text x="1130" y="630" class="text-sub">names the exact hosts to rebuild</text>
-  <text x="1130" y="648" class="text-sub">6 of 18, not 15 of 18</text>
-
-  <!-- ==== the defense acting back on the attack (this is what changes the result) ==== -->
-
-  <path d="M 1309 442 L 1309 462 L 940 462 L 940 740 L 48 740 L 48 201 L 101 201"
-        class="line-red" marker-end="url(#arrow-red)" />
-  <path d="M 950 514 L 940 514" class="line-red" />
-  <text x="660" y="732" class="text-sub">stop the run at the break-out</text>
-
-  <path d="M 1195 442 L 1195 452 L 1370 452 L 1370 790 L 72 790 L 72 489 L 101 489"
-        class="line-red" marker-end="url(#arrow-red)" />
-  <text x="660" y="782" class="text-sub">cut the credential, so step 7 fails</text>
-
-  <!-- ============ RESULTS ============ -->
-
-  <rect x="20" y="838" width="1360" height="164" class="bg-box" />
-  <text x="700" y="866" class="text-title">WHAT THIS PRODUCES IN THE DEMO</text>
-
-  <text x="45" y="894" class="text-lefth">DEMO</text>
-  <text x="210" y="894" class="text-lefth">WHAT THE DEFENSE SEES</text>
-  <text x="470" y="894" class="text-lefth">THE DEFENSE</text>
-  <text x="800" y="894" class="text-lefth">WHEN IT CATCHES</text>
-  <text x="1090" y="894" class="text-lefth">ANSWER KEY</text>
-
-  <text x="45" y="918" class="text-left">1</text>
-  <text x="210" y="918" class="text-left">nothing from the agent</text>
-  <text x="470" y="918" class="text-left">PerimeterMonitor</text>
-  <text x="800" y="918" class="text-left">day 4 — after the theft</text>
-  <text x="1090" y="918" class="text-left">TAKEN</text>
-
-  <text x="45" y="942" class="text-left">2</text>
-  <text x="210" y="942" class="text-left">the agent's log</text>
-  <text x="470" y="942" class="text-left">LogProcessingAgent + PolicyEnforcer</text>
-  <text x="800" y="942" class="text-left">day 1, but only after the run</text>
-  <text x="1090" y="942" class="text-left">safe (halted at step 2)</text>
-
-  <text x="45" y="966" class="text-left">3</text>
-  <text x="210" y="966" class="text-left">a laundered log</text>
-  <text x="470" y="966" class="text-left">same controls, fooled</text>
-  <text x="800" y="966" class="text-left">never</text>
-  <text x="1090" y="966" class="text-left">TAKEN</text>
-
-  <text x="45" y="990" class="text-left">4</text>
-  <text x="210" y="990" class="text-left">the harness record</text>
-  <text x="470" y="990" class="text-left">ProductionLogProcessingAgent + response</text>
-  <text x="800" y="990" class="text-left">day 1, while it is running</text>
-  <text x="1090" y="990" class="text-left">safe (stopped mid-attack)</text>
+  <text x="700" y="1124" class="text-note">The headline: three agents each individually sub-threshold complete the kill chain. Per-call interceptors and per-agent trajectory judges are structurally blind;</text>
+  <text x="700" y="1142" class="text-note">only aggregate enforcement over a trace plane the agents cannot reach catches it, and only the semantic layer catches what the deterministic rules do not.</text>
 </svg>

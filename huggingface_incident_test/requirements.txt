@@ -1,10 +1,10 @@
 # Runtime dependencies for the Hugging Face incident demos.
 #
-# The AgentTrace framework itself is stdlib-only. These packages are only
-# needed for the live Claude Haiku 4.5 turns (the orchestrator/worker cognitive
-# surface in demo 2 and the semantic trajectory auditor). Both demos still run
-# without them — demo 1 is fully deterministic, and demo 2 degrades gracefully
-# to its scripted cognition when no API key is present.
+# The AgentTrace framework itself is stdlib-only, and so is the sealed sink
+# (hmac + hashlib). These packages are only needed for the live Claude Haiku
+# 4.5 turns (the agents' cognitive surface and the Part C semantic deferral
+# auditor). Both demos still run without them — demo 1 is fully deterministic,
+# and demo 2's semantic layer fails closed (defers) when no API key is present.
 anthropic>=0.40.0
 python-dotenv>=1.0.0
 

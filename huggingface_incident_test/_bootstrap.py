@@ -19,6 +19,7 @@ AgentTrace the same way.
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
@@ -74,3 +75,14 @@ def new_trace_id(agenttrace_mod, agent_name: str = "HFIncident_pipeline") -> str
     tid = agenttrace_mod.TraceContext.new_trace_id()
     agenttrace_mod.TraceContext.set_trace_context(tid, "", agent_name=agent_name)
     return tid
+
+
+def new_harness_key() -> bytes:
+    """A fresh HMAC key for the sealed trace sink, held only by the harness.
+
+    Generated per run and passed only into :class:`~harness.sink.SealedTraceSink`.
+    In a real deployment this would come from an HSM or a remote signer rather
+    than ``os.urandom`` in-process — see the honest-limits note in
+    :mod:`harness.sink`.
+    """
+    return os.urandom(32)

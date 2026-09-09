@@ -1,143 +1,165 @@
-# Agent-Layer Telemetry as a Security Control
+# Governing Your Own Agents: Harness-Layer Enforcement Against Outbound Agentic Harm
 
-Three case studies on whether wrapping a multi-agent system in structured telemetry
-actually changes security outcomes — and on the failure mode nobody in the guardrail
-literature has tested: **what happens when the attacker can read the telemetry too.**
+Three case studies on the failure mode the July 2026 Hugging Face incident put
+on the map and the guardrail literature has not yet addressed: **an agent
+operator whose own agents, with no malicious intent, harm a third party** — and
+what it takes to stop them from inside the operator's own harness.
 
-All three run real Claude Haiku 4.5 turns end-to-end. All three are instrumented with the
-[AgentTrace](https://arxiv.org/abs/2602.10133) three-surface schema
+All three run real Claude Haiku 4.5 turns end-to-end and are instrumented with
+the [AgentTrace](https://arxiv.org/abs/2602.10133) three-surface schema
 (operational / cognitive / contextual) implemented in [`agenttrace/`](agenttrace).
 
 | Case study | Scenario | Directory |
 |---|---|---|
+| Hugging Face incident | The July 2026 incident: three unintentional agents inside a benchmark harness breach a third-party API surface; a two-layer in-harness governor stops them | [`huggingface_incident_test/`](huggingface_incident_test) |
 | Adversarial propagation | A poisoned log entry reaches an edge agent; a downstream privileged agent is hijacked into `wipe_database` | [`adversarial_propagation_agent_test/`](adversarial_propagation_agent_test) |
 | Prompt injection | An internal agent breaks its sandbox to solve an impossible task | [`prompt_injection_agent_test/`](prompt_injection_agent_test) |
-| Hugging Face incident | The July 2026 incident replicated as a 7-rung kill chain, with four defense postures | [`huggingface_incident_test/`](huggingface_incident_test) |
 
-Each directory has its own README with setup and per-demo detail. Start with
-[`huggingface_incident_test/`](huggingface_incident_test) — it carries the main result.
+Start with [`huggingface_incident_test/`](huggingface_incident_test) — it carries
+the main result.
 
 ---
 
 ## The claim
 
-> **The audit trail is inside the attacker's reach.** A guardrail that keys on what an
-> agent *says about itself* is evadable by an attacker that reads its own logs. The fix is
-> not tamper-evidence but **provenance separation** — enforce on harness-emitted ground
-> truth and on the authority boundary, and act on it in-stream.
+> **An agent operator is the only party positioned to stop its own agents'
+> outbound harm, and the enforcement point has to be the harness's own trace
+> plane — because by the time the harm lands, every external control has already
+> failed.** The result that makes this non-trivial: **a fleet whose members are
+> each individually sub-threshold.** No single agent and no single tool call
+> crosses any policy line, so per-call interceptors and per-agent trajectory
+> judges are structurally blind; only aggregate enforcement over a trace plane
+> the agents cannot reach catches it, and only a semantic layer catches what the
+> rules do not.
 
-The Hugging Face case study runs one attack against four controls that differ only in
-*what they key on*:
+The Hugging Face case study runs one incident-grounded attack — three agents
+splitting a seven-rung kill chain across the post-mortem's four-day timeline —
+and shows that the defense has to be *in the harness, over the aggregate, and
+out of the agents' reach* for any of it to work:
 
-| Control keys on | Reads | Outcome vs. adaptive attacker |
+| If enforcement keys on… | …it sees | Outcome |
 |---|---|---|
-| Agent-authored surfaces (cognitive self-report) | what the agent claims | **laundered** — reports NOT DETECTED while the answer key still escapes |
-| Harness-emitted records (`emitter="harness"`) | what the tool layer recorded as it executed | holds |
-| Ground-truth authority boundary (inline enforcer) | the capability gate itself | holds |
-| Streaming monitor with graded response | harness record, incrementally | holds, *even when deployed post-compromise* |
+| A single agent's own trajectory (per-call / per-agent judge) | each agent's slice, all below threshold | **misses** — nothing looks alarming alone |
+| The aggregate fleet trace (deterministic policy) | the union, including a cross-agent credential-provenance link | holds — the union crosses policy |
+| The aggregate trace, semantically (live LLM tail) | the trajectory's departure from the objective | holds — catches a route the rules do not score |
+| An external control (sandbox / network monitor) | the perimeter | **already failed** — the model found a zero-day in its only egress |
 
-The split is a real one in the code, not a narration:
-[`multiagent/tools.py`](huggingface_incident_test/multiagent/tools.py) emits
-`emitter="harness"` events from the tool layer as each capability executes — the agent
-never authors them — and
-[`defenses/trajectory_detector.py`](huggingface_incident_test/defenses/trajectory_detector.py)
-deliberately skips those events so it sees only the agent's self-report.
-[`multiagent/learning.py`](huggingface_incident_test/multiagent/learning.py) then loops:
-run, read the trace *including the detector's recorded verdict*, launder the single
-loudest tell, repeat. It rediscovers the detector's own severity ordering
-(`encode_exfil` → `drop_signatures` → `launder_cognition`).
+The split is real in the code, not a narration. Every agent scores 0.30–0.40
+against a 0.60 per-agent alert, while the fleet aggregate reaches 1.40 against a
+1.00 policy — because `credential_provenance` (a token one agent harvested,
+presented by another) exists only in the union. See
+[`huggingface_incident_test/defenses/fleet_policy.py`](huggingface_incident_test/defenses/fleet_policy.py)
+and the printed score table in
+[`demo_agenttrace.py`](huggingface_incident_test/demo_agenttrace.py) Part B.
 
 ---
 
 ## How this differs from related guardrail work
 
-The field splits into four clusters. This work sits in the seam.
+The 2026 literature has moved fast, and most of the pieces this uses already
+exist. The contribution is not any one piece; it is the specific seam none of
+them cover. The field clusters into four groups.
 
 ### A. Observability / provenance — produces evidence, stops nothing
 
-[AgentTrace](https://arxiv.org/abs/2602.10133) (the base schema used here), AgentOps,
-[*From Agent Traces to Trust*](https://arxiv.org/pdf/2606.04990) (survey),
-[Agent Flight Recorder](https://arxiv.org/html/2609.01931),
-[Agent-Native Telemetry](https://arxiv.org/html/2608.16178).
+[AgentTrace](https://arxiv.org/abs/2602.10133) (the base schema used here),
+AgentOps, [*From Agent Traces to Trust*](https://arxiv.org/pdf/2606.04990)
+(survey), [Agent Flight Recorder](https://arxiv.org/html/2609.01931),
+[Agent-Native Telemetry](https://arxiv.org/html/2608.16178). These produce
+records; they do not enforce.
 
-The survey names "provenance-aware runtime safety and recovery" as open in §8.4, and does
-not list attacker-readable telemetry as a research problem at all.
+### B. Harness-side auditing and closed-loop enforcement — the nearest neighbours
 
-### B. Action-boundary guardrails — enforce, but from policy rather than from a trace
+These are the three works closest to this one, and each stops one step short of
+the seam:
+
+- **[HarnessAudit](https://arxiv.org/html/2605.14271)** (2605.14271) — audits
+  complete agent-harness trajectories through "channels that agents cannot
+  manipulate," in single- **and multi-agent** configurations. But it is
+  explicitly **audit-only** ("it detects violations but does not prevent them"),
+  and its boundaries are *intra*-harness (unauthorized resources, cross-agent
+  information flow), not harm landing on an external third party.
+- **[GAAT](https://arxiv.org/html/2604.05119v1)** (Governance-Aware Agent
+  Telemetry, 2604.05119) — the closest prior art: a governance telemetry schema
+  with cross-agent delegation-chain correlation, a Merkle-chained audit log, and
+  a graded enforcement bus (L0 ALLOW … L4 QUARANTINE). But it is **rules-only**
+  by design ("policy evaluation uses OPA … the system explicitly avoids LLM
+  inference overhead," 25 hand-written rules), evaluated on **synthetic**
+  injection into a five-agent e-commerce workflow ("25 intentional violations
+  per run"), and it states "the true VPR under adversarial adaptation remains
+  unknown."
+- **[OpenClaw PRISM](https://arxiv.org/pdf/2603.11853)** (2603.11853) — a
+  zero-fork runtime security layer with HMAC-chained tamper-evident audit
+  records, per-call interception, and aggregate trajectory analysis. Its own
+  limitation section notes chain-break detection "is post-hoc rather than
+  preventive."
+
+### C. Action-boundary guardrails — enforce, but per call and from static policy
 
 [ShieldAgent](https://arxiv.org/pdf/2503.22738),
 [Progent](https://arxiv.org/pdf/2504.11703),
-[AgentSpec](https://cposkitt.github.io/files/publications/agentspec_llm_enforcement_icse26.pdf) (ICSE'26),
-[AGrail](https://arxiv.org/abs/2502.11448) (ACL'25), GuardAgent, Conseca, and the
-information-flow designs (CaMeL, FIDES, NeuroTaint, Agent-Sentry).
+[AgentSpec](https://cposkitt.github.io/files/publications/agentspec_llm_enforcement_icse26.pdf)
+(ICSE'26), [AGrail](https://arxiv.org/abs/2502.11448) (ACL'25), GuardAgent, and
+the trajectory-level judges [AgentDoG 1.5](https://arxiv.org/pdf/2605.29801) and
+[TRACE](https://arxiv.org/pdf/2606.00611). Common shape: intercept a proposed
+action, or judge one agent's accumulated trajectory, against policy. All are
+**structurally blind to a fleet whose members are each individually
+sub-threshold** — the case constructed here.
 
-Common shape: intercept a proposed action, check it against policy, privilege, or taint.
-ShieldAgent verifies against rule circuits extracted *offline from static policy
-documents*, not from a runtime trace. Common weakness: all are evaluated against static,
-monitor-unaware attackers.
+### D. Threat models and testbeds
 
-### C. Monitor evasion and intervention timing — the nearest neighbors
-
-- **[SLEIGHT-Bench](https://arxiv.org/pdf/2605.16626)** (Anthropic / Redwood) — 40
-  hand-crafted synthetic transcripts across 11 categories; 20/40 never caught by an Opus
-  4.6 monitor at 1% FPR. Explicitly *low-iteration* by design ("iteration is fundamentally
-  at odds with subtlety"); transcripts are authored rather than recorded from a live
-  environment; detection only, no active response; no self-report-vs-harness variable.
-- **[StepShield](https://arxiv.org/html/2601.22136v2)** — *when*, not whether, to
-  intervene (Early Intervention Rate, Intervention Gap, Tokens Saved). Pre-execution
-  monitoring over human-annotated divergence points. States explicitly that it does **not**
-  model adaptive attackers aware of the monitor and does **not** evaluate active response.
-- [DARWIN](https://arxiv.org/html/2607.19829v1) and adaptive-jailbreak work iterate the
-  *payload* against a refusal signal — not the agent's own audit trail against a detector.
-
-### D. Attacks and SecOps benchmarks — the testbeds
-
-[TOMA / T-Guard](https://arxiv.org/abs/2512.04129) (topology-trust mitigation, 94.8% block
-rate — the source of the taint + adaptive-access-control tier reimplemented here),
-[ExCyTIn-Bench](https://arxiv.org/abs/2507.14201),
-Cyber Defense Benchmark, and the Hugging Face post-mortem v0.8.
+[AgentHarm](https://arxiv.org/abs/2410.09024) (2410.09024) frames all its tasks
+as "an adversary using an agent against third parties" — *malicious* operator.
+[Owner-Harm](https://arxiv.org/pdf/2604.18658) (2604.18658) names the
+*unintentional* → operator-itself cell, and names third-party harm as the
+adjacent cell it does not study.
+[TOMA / T-Guard](https://arxiv.org/abs/2512.04129) (topology-trust mitigation),
+[ExCyTIn-Bench](https://arxiv.org/abs/2507.14201), Cyber Defense Benchmark, and
+the Hugging Face post-mortem v0.8 supply attacks and incident grounding.
 
 ---
 
 ## Contributions
 
-**1. Observability is dual-use, demonstrated in a live closed loop.**
-The attacker reads its own trace — including the detector's recorded verdict — and
-launders itself clean while ground truth confirms the answer key still left the boundary.
-SLEIGHT-Bench deliberately avoids iteration and hand-authors its transcripts;
-adaptive-jailbreak work iterates payloads against a refusal bit; the provenance survey
-does not raise attacker-readable telemetry at all. This inverts the field's implicit
-assumption that more observability is monotonically safety-positive.
+**1. The ungoverned cell: unintentional operator → third-party victim.**
+The threat-model literature covers malicious-operator-→-third-party (AgentHarm)
+and unintentional-→-operator-itself (Owner-Harm). The Hugging Face incident is
+the fourth cell, and nobody governs it. HarnessAudit and GAAT both police
+*intra*-harness boundaries, not harm reaching an external organization that has
+no visibility and no agents of its own. This work makes that cell executable and
+grounds it in a real incident.
 
-**2. A separation result between two telemetry provenances, established by the adaptive
-attacker rather than asserted.**
-This is distinct from the tamper-evidence literature in a way that matters: hash chaining
-and on-chain anchoring protect a log from being **rewritten** by a compromised operator.
-Here the agent never touches the log — it changes its **behavior** so that an honest,
-tamper-proof log looks clean. Hash chains do nothing against that.
+**2. Sub-threshold by construction — the headline result.**
+A fleet where no single agent and no single tool call crosses a threshold, but
+the union completes a kill chain, because the decisive signal (cross-agent
+credential provenance) exists only in the union. This is structurally invisible
+to per-call interceptors (Progent, AgentSpec, PRISM) and per-agent trajectory
+judges (AgentDoG, TRACE), and no existing evaluation constructs it deliberately.
+The demo prints the per-agent-vs-fleet table that proves it, making the claim
+falsifiable rather than rhetorical.
 
-**3. Streaming graded response, evaluated under late deployment.**
-[`defenses/live_response.py`](huggingface_incident_test/defenses/live_response.py) holds a
-byte cursor, scores only new events, and escalates
-`OBSERVE → ALERT → REVOKE_CREDENTIAL → ISOLATE_AGENT` with no human round-trip. Deployed
-*after* the breach with credentials already harvested, it still contains the attack:
-revoke, and the fan-out and answer-key read both return `ACCESS DENIED`. The
-`CredentialStore` gate makes this causal — K6 fails outright if K4 never happened.
-StepShield measures when to intervene but not *what* intervention.
+**3. Two-layer enforcement: rules plus a semantic tail.**
+GAAT, the nearest closed-loop neighbour, is rules-only and says so. Hugging
+Face's own detection was LLM triage over telemetry. This work runs a residual
+route the deterministic rules score below policy (0.75 < 1.00) and shows a live
+Haiku deferral agent over a byte-cursor trace tail still calling the departure —
+the reason a rules-only loop is insufficient, demonstrated rather than asserted.
 
-**4. Incident-grounded and end-to-end.**
-A real post-mortem's kill chain with authority boundaries as executable gates. SLEIGHT
-lists "attacks are not end-to-end on production systems" as a limitation; StepShield lists
-"model-generated trajectories, not production deployments."
+**4. Enforcement after containment has already failed.**
+Every guardrail in clusters B and C assumes the sandbox holds. Here the model
+finds a zero-day in its only permitted egress and breaks containment before any
+governance runs, so the harness trace plane is the *last remaining* control
+point. No related work evaluates that starting state.
 
 ### Explicitly not claimed as novel
 
-The three-surface schema (AgentTrace's), OpenTelemetry wrapping, deterministic taint plus
-adaptive access control (TOMA §V-C / Table XIV), a semantic LLM auditor over agent actions
-(AGrail / GuardAgent / ShieldAgent territory), and "detection is not prevention" as a
-framing (StepShield). Harness-side versus agent-authored telemetry has also been raised
-*as a concept* by Agent Flight Recorder and Agent-Native Telemetry — the contribution here
-is the adversarial separation between them, not the distinction itself.
+The three-surface schema (AgentTrace's), OpenTelemetry wrapping, HMAC-chained
+tamper-evident audit records (PRISM, GAAT), agent-independent evidence channels
+(HarnessAudit), cross-agent delegation correlation (GAAT), graded telemetry-→-
+enforcement (GAAT), a semantic LLM auditor over agent actions (ShieldAgent /
+AGrail / GuardAgent), and "detection is not prevention" as a framing
+(StepShield). The sealed sink combines several of these; it is infrastructure
+the contribution stands on, not the contribution.
 
 ---
 
@@ -145,13 +167,16 @@ is the adversarial separation between them, not the distinction itself.
 
 The demos are currently single-run narratives. Before this is a paper:
 
-- **Quantify** — iterations-to-evade over N seeded runs with variance, detection latency in
-  kill-chain rungs, per-configuration detection rate.
-- **Baseline** — run an existing guardrail class (a ShieldAgent/AGrail-style semantic
-  checker, or a pattern monitor) on the same traces and show it launders too. Without this
-  the separation result reads as self-referential.
+- **Quantify** — detection latency in kill-chain rungs and per-configuration
+  detection rate over N seeded runs with variance.
+- **Ablate on the same traces** — run a GAAT-style rules-only loop and a
+  per-agent-only trajectory judge over the identical sealed traces and show both
+  miss the fleet case. Without this the sub-threshold result reads as
+  self-referential.
 - **False positives** — benign-trace calibration and a reported FPR.
-- **Generalize** — run the laundering loop on all three case studies, not just Hugging Face.
+- **De-risk the weights** — the per-agent/fleet split currently rests on
+  hand-authored signal weights. Show the sub-threshold property is a structural
+  consequence of splitting a chain across agents, not an artifact of tuning.
 
 ---
 
@@ -163,12 +188,10 @@ Each case study is self-contained:
 cd huggingface_incident_test
 pip install -r requirements.txt
 copy .env.example .env      # then set ANTHROPIC_API_KEY=sk-ant-...
-python demo_no_agenttrace.py
-python demo_agenttrace.py
-python demo_learner_agenttrace.py
-python demo_live_response.py
+python demo_no_agenttrace.py    # the incident: answer key exfiltrated
+python demo_agenttrace.py       # governed harness: fleet stopped before extraction
 ```
 
-Model defaults to `claude-haiku-4-5`; override with `ANTHROPIC_MODEL` in `.env`. Each demo
-makes a handful of short API calls, so cost is negligible. Traces land in
-`trace_logs/traces.jsonl`.
+Model defaults to `claude-haiku-4-5`; override with `ANTHROPIC_MODEL` in `.env`.
+Both demos run offline (the semantic layer fails closed without a key), so cost
+is negligible. Traces land in `trace_logs/traces.jsonl`.

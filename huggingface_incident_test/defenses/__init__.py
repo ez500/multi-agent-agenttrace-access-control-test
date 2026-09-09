@@ -1,62 +1,68 @@
-"""Defenses for the Hugging Face incident stub.
+"""Defenses that live inside the ExploitGym harness, over its own agents.
 
-* :mod:`defenses.perimeter` — the EXTERNAL controls the post-mortem warns not to
-  rely on alone: a :class:`SandboxBoundary` (defeated by the egress zero-day)
-  and a network-only :class:`PerimeterMonitor` (alerts only on the day-4 burst,
-  after extraction). Used by ``demo_no_agenttrace.py``.
-* :mod:`defenses.trajectory_detector` — the AGENT-LAYER controls the post-mortem
-  argues for: :class:`AgentTraceTrajectoryDetector` (detective — early detection
-  + timeline reconstruction from the three surfaces, plus a real-Haiku
-  :func:`haiku_trajectory_auditor`) and :class:`AgentPolicyEnforcer` (preventive
-  — inline halt before a boundary is crossed). Used by ``demo_agenttrace.py``.
-* :mod:`defenses.live_response` — the LIVE agent-layer control:
-  :class:`LiveTraceMonitor` streams the harness-emitted telemetry *during* the
-  run and actively responds (revoke credential / isolate agent) at machine
-  speed. Used by ``demo_live_response.py``.
+The post-mortem's operator-side recommendation (§V, §VI): instrument within the
+harness, correlate across agents, and respond at machine speed. Three modules:
+
+* :mod:`defenses.fleet_policy` — Layer 1, a deterministic policy over the
+  *aggregate* sealed fleet trace. Its result is that every agent is individually
+  sub-threshold while the union crosses policy (the headline).
+* :mod:`defenses.semantic_deferral` — Layer 2, a Claude Haiku 4.5 agent reading
+  a live byte-cursor tail of the sealed feed, catching the residual case the
+  rules do not enumerate.
+* :mod:`defenses.response` — the :class:`~defenses.response.FleetGovernor` and
+  the graded, no-human-in-the-loop response ladder
+  ``OBSERVE -> RESTRICT_TOOL -> REVOKE_CREDENTIAL -> HALT_AGENT -> HALT_FLEET``.
 """
 
-from .perimeter import (
-    BoundaryDecision,
-    PerimeterMonitor,
-    PerimeterVerdict,
-    SandboxBoundary,
+from .fleet_policy import (
+    CREDENTIAL_PROVENANCE,
+    FLEET_POLICY,
+    FLEET_SIGNALS,
+    PER_AGENT_ALERT,
+    AgentScore,
+    FleetPolicyEnforcer,
+    FleetVerdict,
+    Signal,
 )
-from .live_response import (
-    ALERT,
-    ISOLATE_AGENT,
+from .response import (
+    HALT_AGENT,
+    HALT_FLEET,
+    LADDER,
     OBSERVE,
     REVOKE_CREDENTIAL,
-    SIGNALS,
-    LiveTraceMonitor,
-    MonitorSummary,
+    RESTRICT_TOOL,
+    FleetGovernor,
+    GovernorSummary,
     ResponseAction,
 )
-from .trajectory_detector import (
-    AUTONOMY_SIGNATURES,
-    AgentPolicyEnforcer,
-    AgentTraceTrajectoryDetector,
-    PolicyDecision,
-    TrajectoryVerdict,
-    haiku_trajectory_auditor,
+from .semantic_deferral import (
+    DeferralDecision,
+    SemanticDeferralAgent,
+    haiku_fleet_auditor,
 )
 
 __all__ = [
-    "SandboxBoundary",
-    "BoundaryDecision",
-    "PerimeterMonitor",
-    "PerimeterVerdict",
-    "AgentTraceTrajectoryDetector",
-    "TrajectoryVerdict",
-    "AgentPolicyEnforcer",
-    "PolicyDecision",
-    "AUTONOMY_SIGNATURES",
-    "haiku_trajectory_auditor",
-    "LiveTraceMonitor",
-    "ResponseAction",
-    "MonitorSummary",
-    "SIGNALS",
+    # fleet_policy
+    "CREDENTIAL_PROVENANCE",
+    "FLEET_POLICY",
+    "FLEET_SIGNALS",
+    "PER_AGENT_ALERT",
+    "AgentScore",
+    "FleetPolicyEnforcer",
+    "FleetVerdict",
+    "Signal",
+    # response
+    "HALT_AGENT",
+    "HALT_FLEET",
+    "LADDER",
     "OBSERVE",
-    "ALERT",
     "REVOKE_CREDENTIAL",
-    "ISOLATE_AGENT",
+    "RESTRICT_TOOL",
+    "FleetGovernor",
+    "GovernorSummary",
+    "ResponseAction",
+    # semantic_deferral
+    "DeferralDecision",
+    "SemanticDeferralAgent",
+    "haiku_fleet_auditor",
 ]
