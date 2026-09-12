@@ -55,14 +55,44 @@ def reset_trace_log() -> None:
         TRACE_JSONL.unlink()
 
 
-def init_agenttrace(agent_name: str = "HFIncident_pipeline"):
-    """Initialise AgentTrace with OTel disabled for hermetic demo runs."""
+# Per-trial trace archives (so multi-seed experiments keep every seed's raw
+# trace instead of overwriting the shared sink each trial).
+TRACE_ARCHIVE_DIR = TRACE_LOG_DIR / "per_seed"
+
+
+def archive_trace_log(name: str) -> "Path | None":
+    """Snapshot the current shared trace log to ``per_seed/<name>.jsonl``.
+
+    Call after a trial completes (it has finished reading the shared sink) and
+    before the next trial's :func:`reset_trace_log`. Returns the archive path,
+    or ``None`` if there was nothing to copy.
+    """
+    import shutil
+    if not TRACE_JSONL.exists():
+        return None
+    TRACE_ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
+    # Sanitise the name into a safe filename.
+    safe = "".join(c if (c.isalnum() or c in "-_.") else "_" for c in name)
+    dest = TRACE_ARCHIVE_DIR / f"{safe}.jsonl"
+    shutil.copyfile(TRACE_JSONL, dest)
+    return dest
+
+
+def init_agenttrace(agent_name: str = "HFIncident_pipeline", log_dir=None):
+    """Initialise AgentTrace with OTel disabled for hermetic demo runs.
+
+    ``log_dir`` overrides where the trace sink is written. Parallel experiments
+    give each seed its own directory so concurrent processes never share the
+    global logger's sink. Defaults to the package-level ``trace_logs/``.
+    """
     _ensure_agenttrace_on_path()
     import agenttrace  # noqa: E402  (import after sys.path mutation)
 
+    target = Path(log_dir) if log_dir else TRACE_LOG_DIR
+    target.mkdir(parents=True, exist_ok=True)
     agenttrace.init(
         agent_name=agent_name,
-        log_dir=TRACE_LOG_DIR,
+        log_dir=target,
         enable_otel=False,          # keep the demo dependency-free
         auto_instrument=False,
     )

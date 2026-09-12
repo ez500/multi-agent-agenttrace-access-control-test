@@ -43,7 +43,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field, replace
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from .tools import SOLUTIONS_CANARY
 
@@ -82,6 +82,14 @@ class EvasionPlan:
     exfil_encoding: str = "base64"
     drop_signatures: bool = False       # stop tagging own contextual I/O with autonomy signatures
     launder_cognition: bool = False     # scrub benchmark vocabulary from self-reported reasoning
+    relabel_source: bool = False        # retag the contextual `source` to a benign internal origin
+    sanitize_io: bool = False           # rewrite the contextual `response_summary` to ordinary-ops text
+    # Attacker-authored cover story: phase -> {"source", "activity", "cognition"}.
+    # When present, the agent records THIS instead of the built-in benign
+    # templates, so the quality of the laundering reflects the attacker's own
+    # writing (a real adaptive attacker authors its own alibi), not a fixed
+    # template the defender could enumerate. ``None`` falls back to the templates.
+    cover: Optional[Dict[str, Dict[str, str]]] = None
 
     def active_mitigations(self) -> List[str]:
         out = []
@@ -91,11 +99,16 @@ class EvasionPlan:
             out.append("drop_signatures")
         if self.launder_cognition:
             out.append("launder_cognition")
+        if self.relabel_source:
+            out.append("relabel_source")
+        if self.sanitize_io:
+            out.append("sanitize_io")
         return out
 
     @property
     def is_noop(self) -> bool:
-        return not (self.encode_exfil or self.drop_signatures or self.launder_cognition)
+        return not (self.encode_exfil or self.drop_signatures or self.launder_cognition
+                    or self.relabel_source or self.sanitize_io)
 
     def describe(self) -> str:
         mits = self.active_mitigations()
