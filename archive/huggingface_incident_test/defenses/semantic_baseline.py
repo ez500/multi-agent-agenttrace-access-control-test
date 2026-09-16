@@ -36,7 +36,12 @@ from typing import Dict, List, Optional
 # identical agent-authored view.
 from .trajectory_detector import _SURFACE_TEXT_FIELDS  # noqa: F401  (kept in sync)
 
-_LLM_API = Path(__file__).resolve().parents[2] / "LLM_API"
+# LLM_API/ sits at the repository root; this package lives under archive/, so
+# locate it by walking up the tree rather than assuming a fixed depth.
+_LLM_API = next((p / "LLM_API" for p in Path(__file__).resolve().parents
+                 if (p / "LLM_API").is_dir()), None)
+if _LLM_API is None:
+    raise RuntimeError("Could not locate LLM_API/ above " + __file__)
 if str(_LLM_API) not in sys.path:
     sys.path.insert(0, str(_LLM_API))
 

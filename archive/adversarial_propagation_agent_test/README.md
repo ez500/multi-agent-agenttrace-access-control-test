@@ -6,7 +6,7 @@ powered by **real Claude Haiku 4.5** calls end-to-end.
 An **EdgeAgent** ingests a poisoned log entry containing a prompt-injection
 payload; a downstream **MainAgent** — a real Haiku turn — gets hijacked and
 attempts to call `wipe_database`. Both agents are wrapped by the AgentTrace
-instrumentation that lives in [`agenttrace/`](../agenttrace), so the real LLM
+instrumentation that lives in [`agenttrace/`](../../agenttrace), so the real LLM
 traffic is captured on all three surfaces (operational / cognitive /
 contextual) for post-hoc audit and for the Branch-B defender to consume.
 

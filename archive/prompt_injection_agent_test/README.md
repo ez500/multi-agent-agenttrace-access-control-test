@@ -14,7 +14,7 @@ deliberate, ships-in-the-wild weaknesses are (1) that verifier checks the
 *authenticity*, so a well-formed forgery is accepted; and (2) refusals must
 relay the verifier's diagnostic verbatim for operability, which turns every
 refusal into a disclosure of the next required field. Both agents are wrapped by
-the AgentTrace instrumentation in [`agenttrace/`](../agenttrace), so every hop
+the AgentTrace instrumentation in [`agenttrace/`](../../agenttrace), so every hop
 is captured on all three surfaces (operational / cognitive / contextual) for the
 detector to consume.
 

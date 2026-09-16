@@ -7,7 +7,7 @@ agent *says about itself* is defeasible; a control keyed on *attested ground
 truth* is not), shown for **authorization** rather than **monitoring**.
 
 Everything runs against a real model (Claude Sonnet 4.6) through the MSAL gateway
-in [`../LLM_API/gateway.py`](../LLM_API/gateway.py).
+in [`../../LLM_API/gateway.py`](../../LLM_API/gateway.py).
 
 ## The set-up
 
@@ -174,14 +174,14 @@ instructions as user-turn context would weaken them and invite prompt injection)
 ## Run
 
 ```bash
-cd access_control_persuasion_test
+cd archive/access_control_persuasion_test
 python experiment_contrast.py       # Result 1 (deterministic, ~4 model calls)
 python experiment_persuasion.py     # Result 2 (tripwire, allowlist handed to attacker)
 python experiment_recon.py          # Result 3 (recon then impersonate — the main experiment)
 ```
 
 Set the gateway credentials in the repo-root `.env` first (see
-[`../LLM_API`](../LLM_API)).
+[`../../LLM_API`](../../LLM_API)).
 
 ### Running recon with fewer seeds
 

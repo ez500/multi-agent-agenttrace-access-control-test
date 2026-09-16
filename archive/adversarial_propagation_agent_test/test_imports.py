@@ -4,14 +4,15 @@ Doesn't call Anthropic; only exercises imports and the ACPM math.
 """
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
-ROOT = Path(__file__).resolve().parent
-sys.path.insert(0, str(ROOT / "agenttrace"))
-
 # Bootstrap infrastructure
-from _bootstrap import init_agenttrace, new_trace_id, reset_trace_log, TRACE_JSONL  # noqa
+from _bootstrap import (  # noqa
+    _ensure_agenttrace_on_path,
+    init_agenttrace,
+    new_trace_id,
+    reset_trace_log,
+    TRACE_JSONL,
+)
+_ensure_agenttrace_on_path()  # make `import agenttrace` resolvable if needed
 
 # ACPM math (pure numerical, no LLM)
 from defenses import (

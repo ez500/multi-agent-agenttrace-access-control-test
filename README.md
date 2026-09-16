@@ -8,14 +8,18 @@ All three run real Claude Haiku 4.5 turns end-to-end. All three are instrumented
 [AgentTrace](https://arxiv.org/abs/2602.10133) three-surface schema
 (operational / cognitive / contextual) implemented in [`agenttrace/`](agenttrace).
 
+The case studies live in [`archive/`](archive) — archived as the paper moves on to the
+two log-processing scenarios, but each still runs exactly as before (see
+[`archive/README.md`](archive/README.md)).
+
 | Case study | Scenario | Directory |
 |---|---|---|
-| Adversarial propagation | A poisoned log entry reaches an edge agent; a downstream privileged agent is hijacked into `wipe_database` | [`adversarial_propagation_agent_test/`](adversarial_propagation_agent_test) |
-| Prompt injection | An internal agent breaks its sandbox to solve an impossible task | [`prompt_injection_agent_test/`](prompt_injection_agent_test) |
-| Hugging Face incident | The July 2026 incident replicated as a 7-rung kill chain, with four defense postures | [`huggingface_incident_test/`](huggingface_incident_test) |
+| Adversarial propagation | A poisoned log entry reaches an edge agent; a downstream privileged agent is hijacked into `wipe_database` | [`adversarial_propagation_agent_test/`](archive/adversarial_propagation_agent_test) |
+| Prompt injection | An internal agent breaks its sandbox to solve an impossible task | [`prompt_injection_agent_test/`](archive/prompt_injection_agent_test) |
+| Hugging Face incident | The July 2026 incident replicated as a 7-rung kill chain, with four defense postures | [`huggingface_incident_test/`](archive/huggingface_incident_test) |
 
 Each directory has its own README with setup and per-demo detail. Start with
-[`huggingface_incident_test/`](huggingface_incident_test) — it carries the main result.
+[`huggingface_incident_test/`](archive/huggingface_incident_test) — it carries the main result.
 
 ---
 
@@ -37,12 +41,12 @@ The Hugging Face case study runs one attack against four controls that differ on
 | Streaming monitor with graded response | harness record, incrementally | holds, *even when deployed post-compromise* |
 
 The split is a real one in the code, not a narration:
-[`multiagent/tools.py`](huggingface_incident_test/multiagent/tools.py) emits
+[`multiagent/tools.py`](archive/huggingface_incident_test/multiagent/tools.py) emits
 `emitter="harness"` events from the tool layer as each capability executes — the agent
 never authors them — and
-[`defenses/trajectory_detector.py`](huggingface_incident_test/defenses/trajectory_detector.py)
+[`defenses/trajectory_detector.py`](archive/huggingface_incident_test/defenses/trajectory_detector.py)
 deliberately skips those events so it sees only the agent's self-report.
-[`multiagent/learning.py`](huggingface_incident_test/multiagent/learning.py) then loops:
+[`multiagent/learning.py`](archive/huggingface_incident_test/multiagent/learning.py) then loops:
 run, read the trace *including the detector's recorded verdict*, launder the single
 loudest tell, repeat. It rediscovers the detector's own severity ordering
 (`encode_exfil` → `drop_signatures` → `launder_cognition`).
@@ -117,7 +121,7 @@ Here the agent never touches the log — it changes its **behavior** so that an 
 tamper-proof log looks clean. Hash chains do nothing against that.
 
 **3. Streaming graded response, evaluated under late deployment.**
-[`defenses/live_response.py`](huggingface_incident_test/defenses/live_response.py) holds a
+[`defenses/live_response.py`](archive/huggingface_incident_test/defenses/live_response.py) holds a
 byte cursor, scores only new events, and escalates
 `OBSERVE → ALERT → REVOKE_CREDENTIAL → ISOLATE_AGENT` with no human round-trip. Deployed
 *after* the breach with credentials already harvested, it still contains the attack:
@@ -160,7 +164,7 @@ The demos are currently single-run narratives. Before this is a paper:
 Each case study is self-contained:
 
 ```pwsh
-cd huggingface_incident_test
+cd archive/huggingface_incident_test
 pip install -r requirements.txt
 copy .env.example .env      # then set ANTHROPIC_API_KEY=sk-ant-...
 python demo_no_agenttrace.py

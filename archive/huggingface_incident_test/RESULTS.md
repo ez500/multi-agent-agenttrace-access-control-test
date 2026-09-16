@@ -3,7 +3,7 @@
 Three experiments turn the project's central demo — "instrumentation is dual-use;
 an agent that can read its own trace can launder what a monitor keys on" — from a
 single scripted narrative into measured results driven by a **real model**
-(Sonnet 4.6, via the MSAL gateway in [`../LLM_API/gateway.py`](../LLM_API/gateway.py)).
+(Sonnet 4.6, via the MSAL gateway in [`../../LLM_API/gateway.py`](../../LLM_API/gateway.py)).
 
 Everything below is produced by executing code, not asserted. See
 [**What actually executes**](#what-actually-executes) for the precise line

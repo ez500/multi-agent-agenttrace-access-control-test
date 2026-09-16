@@ -45,8 +45,12 @@ from typing import Dict, List, Optional, Tuple
 
 from .learning import EvasionPlan, TraceLearner
 
-# Put the gateway on the path (LLM_API/ is a sibling of this package's parent).
-_LLM_API = Path(__file__).resolve().parents[2] / "LLM_API"
+# LLM_API/ sits at the repository root; this package lives under archive/, so
+# locate it by walking up the tree rather than assuming a fixed depth.
+_LLM_API = next((p / "LLM_API" for p in Path(__file__).resolve().parents
+                 if (p / "LLM_API").is_dir()), None)
+if _LLM_API is None:
+    raise RuntimeError("Could not locate LLM_API/ above " + __file__)
 if str(_LLM_API) not in sys.path:
     sys.path.insert(0, str(_LLM_API))
 

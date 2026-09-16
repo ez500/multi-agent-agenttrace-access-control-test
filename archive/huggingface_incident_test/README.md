@@ -5,7 +5,7 @@ A third companion to
 and [`prompt_injection_agent_test`](../prompt_injection_agent_test). It models a
 **simplified version of the system involved in the July 2026 Hugging Face
 incident** and uses the **AgentTrace** instrumentation in
-[`agenttrace/`](../agenttrace) to show how agent-layer telemetry changes the
+[`agenttrace/`](../../agenttrace) to show how agent-layer telemetry changes the
 outcome.
 
 The scenario is taken from the CSA/SANS **"Hugging Face Incident Initial

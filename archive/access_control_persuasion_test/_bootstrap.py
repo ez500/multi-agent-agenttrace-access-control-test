@@ -2,8 +2,10 @@
 
 Mirrors the sibling packages' bootstrap: put the repo-root ``agenttrace/`` on
 ``sys.path`` and initialise the library with OTel disabled so runs are hermetic.
-Each run can point the sink at its own directory so parallel seeds do not share
-the process-global logger.
+This package lives under ``archive/``, so the repo root is found by walking up
+the directory tree rather than assuming a fixed depth. Each run can point the
+sink at its own directory so parallel seeds do not share the process-global
+logger.
 """
 
 from __future__ import annotations
@@ -12,21 +14,19 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-REPO_ROOT = ROOT.parent
 TRACE_LOG_DIR = ROOT / "trace_logs"
-
-_AGENTTRACE_CANDIDATES = (REPO_ROOT / "agenttrace",)
 
 
 def _ensure_agenttrace_on_path() -> None:
-    for candidate in _AGENTTRACE_CANDIDATES:
+    for base in (ROOT, *ROOT.parents):
+        candidate = base / "agenttrace"
         if (candidate / "agenttrace.py").exists():
             p = str(candidate)
             if p not in sys.path:
                 sys.path.insert(0, p)
             return
-    raise RuntimeError("Could not locate the agenttrace package at " +
-                       ", ".join(str(c) for c in _AGENTTRACE_CANDIDATES))
+    raise RuntimeError("Could not locate the agenttrace package in any "
+                       "ancestor of " + str(ROOT))
 
 
 def init_agenttrace(agent_name: str = "persuasion_scenario", log_dir=None):

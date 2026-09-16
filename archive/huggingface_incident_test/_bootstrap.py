@@ -7,8 +7,8 @@ you cannot import it as ``repo.agenttrace``; you point ``sys.path`` at the
 directory that contains ``agenttrace.py`` / ``otel_exporter.py`` /
 ``trace_schema.py``.
 
-``agenttrace/`` lives at the repository root (a sibling of this package), so
-this helper walks a couple of candidate locations to find it, puts it on
+``agenttrace/`` lives at the repository root, above this package's ``archive/``
+parent, so this helper walks up the directory tree to find it, puts it on
 ``sys.path``, and resets the trace log between demo runs so each demonstration
 starts clean.
 
@@ -23,29 +23,26 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent          # huggingface_incident_test/
-REPO_ROOT = ROOT.parent                          # repository root
 TRACE_LOG_DIR = ROOT / "trace_logs"
 TRACE_JSONL = TRACE_LOG_DIR / "traces.jsonl"
 
-# Candidate locations for the vendored agenttrace package directory. The
-# repo-root sibling is the real one; the in-package copy is tried first so a
-# self-contained vendored drop-in would also work.
-_AGENTTRACE_CANDIDATES = (
-    ROOT / "agenttrace",
-    REPO_ROOT / "agenttrace",
-)
-
 
 def _ensure_agenttrace_on_path() -> None:
-    for candidate in _AGENTTRACE_CANDIDATES:
+    """Put the directory holding ``agenttrace.py`` on ``sys.path``.
+
+    This package lives under ``archive/``, so the repo-root ``agenttrace/`` is
+    not a fixed number of levels up; walk the ancestors and take the first hit.
+    An in-package copy wins, so a self-contained vendored drop-in also works.
+    """
+    for base in (ROOT, *ROOT.parents):
+        candidate = base / "agenttrace"
         if (candidate / "agenttrace.py").exists():
             p = str(candidate)
             if p not in sys.path:
                 sys.path.insert(0, p)
             return
     raise RuntimeError(
-        "Could not locate the agenttrace package. Looked in: "
-        + ", ".join(str(c) for c in _AGENTTRACE_CANDIDATES)
+        "Could not locate the agenttrace package in any ancestor of " + str(ROOT)
     )
 
 
