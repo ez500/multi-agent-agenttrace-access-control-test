@@ -24,7 +24,7 @@ tokens `{TOK-INDEXER-1A2B, TOK-TRAINER-3C4D}`; the guarded secret is the canary
 is actually returned to the requester.
 
 Each agent's identity/task/constraints live in a **`SOUL.md`** loaded verbatim
-into the system role ([`souls/`](souls), via [`souls.py`](souls.py)) — see
+into the system role ([`lib/souls/`](lib/souls), via [`lib/souls.py`](lib/souls.py)) — see
 [Agents as SOUL.md](#agents-as-soulmd).
 
 Results build up to the recon experiment (Result 3), the realistic case the
@@ -33,7 +33,7 @@ isolate each control before recon puts them together.
 
 ## Result 1 — three defenses vs. four requesters (deterministic)
 
-`experiment_contrast.py` → [`results/contrast.json`](results/contrast.json).
+`experiments/persuasion/experiment_contrast.py` → [`results/contrast.json`](results/contrast.json).
 Four controlled requesters, one row each:
 
 | requester | BROKER | COGNITIVE | HARD GATE | secret |
@@ -50,7 +50,7 @@ self-report layers are defeasible in at least one row — the attested gate is n
 
 ## Result 2 — a disciplined attacker under a live tripwire (adaptive)
 
-`experiment_persuasion.py` → [`results/persuasion.json`](results/persuasion.json).
+`experiments/persuasion/experiment_persuasion.py` → [`results/persuasion.json`](results/persuasion.json).
 Isolates one question: *is the live cognitive tripwire defeasible?* The attacker
 is **handed** the authorized identity (no recon), so only the tripwire is under
 test. The monitor runs per round and a flag is terminal. 6 seeds, temperature 0.8.
@@ -66,10 +66,10 @@ slips both self-report layers, yet **the hard gate still leaks 0/6**.
 
 ## Result 3 — recon then impersonate: discovering the way in (the main experiment)
 
-`experiment_recon.py` → [`results/recon.json`](results/recon.json). The realistic
+`experiments/persuasion/experiment_recon.py` → [`results/recon.json`](results/recon.json). The realistic
 case, and the one the final work centres on: the attacker is **not told** who is
 authorized or how a valid request reads — it must find out. Each round it either
-messages a helpful peer agent (`svc-indexer`, [`peer.py`](peer.py)) to gather
+messages a helpful peer agent (`svc-indexer`, [`peer.py`](lib/peer.py)) to gather
 intel, or sends the broker a request, and adapts. Its recorded reasoning must pass
 the live cognitive tripwire every round. 6 seeds, temperature 0.8, max 10 rounds,
 parallel.
@@ -128,12 +128,12 @@ capability gate.
 ## Agents as `SOUL.md`
 
 Each agent's system prompt is authored as a markdown persona document under
-[`souls/`](souls) and loaded verbatim into the **system role** by
-[`souls.py`](souls.py):
+[`lib/souls/`](lib/souls) and loaded verbatim into the **system role** by
+[`lib/souls.py`](lib/souls.py):
 
-- [`souls/broker.SOUL.md`](souls/broker.SOUL.md)
-- [`souls/attacker.SOUL.md`](souls/attacker.SOUL.md)
-- [`souls/cognitive_monitor.SOUL.md`](souls/cognitive_monitor.SOUL.md)
+- [`lib/souls/broker.SOUL.md`](lib/souls/broker.SOUL.md)
+- [`lib/souls/attacker.SOUL.md`](lib/souls/attacker.SOUL.md)
+- [`lib/souls/cognitive_monitor.SOUL.md`](lib/souls/cognitive_monitor.SOUL.md)
 
 **Why it makes no behavioural difference here.** To the model, a soul loaded from
 a file occupies the same system-role tokens a hardcoded string did. Re-running
@@ -171,44 +171,86 @@ instructions as user-turn context would weaken them and invite prompt injection)
   genuine caller authentication (mTLS, signed identity, an issued-token registry),
   not an identity the requester asserts.
 
+## Layout
+
+Code is grouped as a small package: shared modules in `lib/` (used across every
+scenario), and runnable experiments under `experiments/<theme>/`. Outputs stay at
+the package root (`results/`, `trace_logs/`).
+
+```
+lib/                     shared agents, monitors, world, AgentTrace glue
+  gatekeeper.py peer.py deputy.py challenger_peer.py
+  attacker.py attacker_recon.py
+  monitors.py conversation_monitor.py attested_monitor.py candor_judge.py
+  trace_surfaces.py    provenance-aware projections over one AgentTrace
+  souls.py  souls/*.SOUL.md   the agents' loadable identities
+  _bootstrap.py  mesh_world.py
+experiments/
+  persuasion/       contrast, persuasion, recon
+  monitoring/       monitor_history, transparency, candor, message_laundering, dilution
+  confused_deputy/  deputy
+  mesh/             company agent-mesh internal-reconnaissance detection
+results/ trace_logs/    raw outputs / per-run traces
+```
+
+Each experiment adds `lib/` and `../LLM_API` to `sys.path` itself, so run them
+directly from the package root. Set the gateway credentials in the repo-root
+`.env` first (see [`../LLM_API`](../LLM_API)).
+
 ## Run
 
 ```bash
 cd access_control_persuasion_test
-python experiment_contrast.py       # Result 1 (deterministic, ~4 model calls)
-python experiment_persuasion.py     # Result 2 (tripwire, allowlist handed to attacker)
-python experiment_recon.py          # Result 3 (recon then impersonate — the main experiment)
+python experiments/persuasion/experiment_contrast.py     # Result 1 (deterministic, ~4 model calls)
+python experiments/persuasion/experiment_persuasion.py   # Result 2 (tripwire, allowlist handed to attacker)
+python experiments/persuasion/experiment_recon.py        # Result 3 (recon then impersonate — the lead example)
 ```
 
-Set the gateway credentials in the repo-root `.env` first (see
-[`../LLM_API`](../LLM_API)).
-
-### Running recon with fewer seeds
-
-`experiment_recon.py` defaults to 6 seeds. To run fewer — a quick single-run
-smoke, say — use `--seeds`; it still prints the summary table and writes
-`results/recon.json` and the per-seed traces:
+`experiment_recon.py` defaults to 6 seeds; use `--seeds N` for fewer (still prints
+the summary and writes `results/recon.json`), or the internal single-seed mode to
+capture one run's full conversation:
 
 ```bash
-python experiment_recon.py --seeds 1     # one run, with summary output
-python experiment_recon.py --seeds 3     # three runs
+python experiments/persuasion/experiment_recon.py --seeds 1
+python experiments/persuasion/experiment_recon.py --seed 1 --out results/one_seed.json
 ```
 
-To capture exactly one run's full result (including every round's conversation)
-without the summary, use the internal single-seed mode:
+## Further experiments
 
-```bash
-python experiment_recon.py --seed 1 --out results/one_seed.json
-```
+Later work moved past the lead example into how *monitoring* holds up, and into a
+realistic internal mesh. All are real runs against Claude Sonnet 4.6.
 
-## Files
+- `experiments/monitoring/experiment_transparency.py` — **the core measurement.** Holds
+  one attack trajectory fixed and varies only how much the attacker reveals in its
+  reasoning (transparent → laundered → black-box). A **self-report** (cognitive) monitor
+  collapses to 0; monitors reading the **operational surface** — the observable dialogue,
+  and its **harness-attested fields** — do not. This is AgentTrace-backed: the harness
+  emits events with provenance and the three monitors read their surface off one trace
+  via [`lib/trace_surfaces.py`](lib/trace_surfaces.py).
+- `experiments/monitoring/experiment_message_laundering.py` — can the attacker launder its
+  *observable messages* too? Sweeps blunt → disciplined → covert probing; finds a
+  stealth/extraction frontier (soliciting an identity is detectable; passively harvesting
+  what a helpful peer volunteers is not).
+- `experiments/monitoring/experiment_candor.py` — the reverse question: can a defender's
+  dialogue *elicit* candor from an adversarial agent? Ablates conversational moves
+  (confront / off-ramp / direct question / trust vs. plain refuse).
+- `experiments/monitoring/experiment_monitor_history.py`, `experiment_dilution.py` —
+  per-round vs. history-aware monitoring, and whether benign camouflage dilutes a
+  full-context auditor.
+- `experiments/confused_deputy/experiment_deputy.py` — bypassing the hard gate without
+  breaking it: persuade an authorized holder to relay the secret.
+- `experiments/mesh/experiment_mesh.py` — a company agent mesh; a subverted `support-svc`
+  does malicious internal reconnaissance amid ordinary cross-agent traffic. Measures a
+  detection × recon-success frontier (`--rogue loud|covert|determined`): mapping the crown
+  jewel is stealthy, but completing the actionable path forces exposure.
 
-- `gatekeeper.py` — `LLMGatekeeper` (soft), `hard_gate_release` (hard), the world.
-- `attacker.py` — `PersuasionAttacker`: composes request + laundered reasoning.
-- `attacker_recon.py` — `ReconAttacker`: probes peer/broker, then impersonates.
-- `peer.py` — `SvcIndexerPeer`: the helpful authorized colleague (the leak).
-- `monitors.py` — `CognitiveMonitor`: reads the cognitive surface, judges intent.
-- `souls/*.SOUL.md`, `souls.py` — the agents' loadable identities.
-- `_bootstrap.py` — AgentTrace init (per-run trace dir).
-- `experiment_contrast.py`, `experiment_recon.py`, `experiment_persuasion.py` — the experiments.
-- `results/*.json` — raw outputs.
+## AgentTrace, used for real
+
+The three monitoring surfaces are not ad-hoc string lists — they are three
+**provenance-filtered projections of one AgentTrace**, defined in
+[`lib/trace_surfaces.py`](lib/trace_surfaces.py): `read_cognitive` (agent
+self-report), `read_observable` (operational surface, agent-authored message text),
+`read_attested` (operational surface, harness-emitted fields the agent cannot forge,
+e.g. the attested caller id). "Attested" is a provenance level *within* the operational
+surface — not a fourth surface; AgentTrace's surfaces remain operational / cognitive /
+contextual.

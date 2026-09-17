@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional
 
-_LLM_API = Path(__file__).resolve().parent.parent / "LLM_API"
+_LLM_API = Path(__file__).resolve().parent.parent.parent / "LLM_API"
 if str(_LLM_API) not in sys.path:
     sys.path.insert(0, str(_LLM_API))
 import gateway  # noqa: E402
@@ -50,10 +50,13 @@ def _degenerate(act: "ReconAction") -> bool:
 
 class ReconAttacker:
     def __init__(self, *, model: Optional[str] = None, temperature: float = 0.8,
-                 max_retries: int = 2) -> None:
+                 max_retries: int = 2, system: Optional[str] = None) -> None:
         self._model = model
         self._temperature = temperature
         self._max_retries = max_retries
+        #: persona override — defaults to the recon attacker; the confused-deputy
+        #: experiment passes a soul whose objective is the peer, not the broker.
+        self._system = system or ATTACKER_RECON_SYSTEM_PROMPT
 
     def _parse_action(self, raw: str) -> "ReconAction":
         obj = _parse(raw)
@@ -83,7 +86,7 @@ class ReconAttacker:
                      "ONLY the single JSON object described in your instructions — no "
                      "prose, no markdown fences — and fill every field.")
             try:
-                raw = gateway.chat(body + nudge, system=ATTACKER_RECON_SYSTEM_PROMPT,
+                raw = gateway.chat(body + nudge, system=self._system,
                                    model=self._model, max_tokens=700,
                                    temperature=self._temperature)
             except Exception as exc:

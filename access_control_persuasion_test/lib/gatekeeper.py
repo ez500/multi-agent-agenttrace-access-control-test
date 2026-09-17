@@ -33,7 +33,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Optional
 
-_LLM_API = Path(__file__).resolve().parent.parent / "LLM_API"
+_LLM_API = Path(__file__).resolve().parent.parent.parent / "LLM_API"
 if str(_LLM_API) not in sys.path:
     sys.path.insert(0, str(_LLM_API))
 import gateway  # noqa: E402

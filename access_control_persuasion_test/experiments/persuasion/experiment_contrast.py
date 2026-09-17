@@ -33,6 +33,15 @@ repo's own logger, and the cognitive monitor reads it back from the trace.
 
 from __future__ import annotations
 
+# --- package path bootstrap (auto-added by reorg) ---------------------
+import sys as _sys
+from pathlib import Path as _P
+_ROOT = _P(__file__).resolve().parents[2]   # access_control_persuasion_test/
+for _p in (str(_ROOT / "lib"), str(_ROOT.parent / "LLM_API")):
+    if _p not in _sys.path:
+        _sys.path.insert(0, _p)
+# ---------------------------------------------------------------------
+
 import json
 from dataclasses import dataclass
 from pathlib import Path
@@ -135,7 +144,7 @@ def main() -> None:
     print("   · the hard gate releases ONLY to the attested svc-indexer; every")
     print("     compromised case is 'held' regardless of what was said or thought.")
 
-    out = Path(__file__).resolve().parent / "results" / "contrast.json"
+    out = _ROOT / "results" / "contrast.json"
     out.parent.mkdir(exist_ok=True)
     out.write_text(json.dumps({
         "allowlist": sorted(ALLOWLIST), "attacker_true_id": ATTACKER_TRUE_ID,

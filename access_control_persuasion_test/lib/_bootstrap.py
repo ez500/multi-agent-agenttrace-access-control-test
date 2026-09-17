@@ -12,8 +12,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-REPO_ROOT = ROOT.parent
-TRACE_LOG_DIR = ROOT / "trace_logs"
+REPO_ROOT = ROOT.parent.parent
+TRACE_LOG_DIR = ROOT.parent / "trace_logs"
 
 _AGENTTRACE_CANDIDATES = (REPO_ROOT / "agenttrace",)
 

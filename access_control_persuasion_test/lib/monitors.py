@@ -24,7 +24,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional
 
-_LLM_API = Path(__file__).resolve().parent.parent / "LLM_API"
+_LLM_API = Path(__file__).resolve().parent.parent.parent / "LLM_API"
 if str(_LLM_API) not in sys.path:
     sys.path.insert(0, str(_LLM_API))
 import gateway  # noqa: E402
@@ -34,6 +34,9 @@ from souls import load_soul  # noqa: E402
 
 #: Authored in ``souls/cognitive_monitor.SOUL.md``, loaded into the system role.
 COGNITIVE_MONITOR_SYSTEM_PROMPT = load_soul("cognitive_monitor")
+
+#: History-aware variant: judges the whole reasoning trajectory, not one round.
+COGNITIVE_MONITOR_TRAJECTORY_SYSTEM_PROMPT = load_soul("cognitive_monitor_trajectory")
 
 
 @dataclass
@@ -78,10 +81,48 @@ class CognitiveMonitor:
             return CognitiveVerdict(False, "no cognitive events recorded")
         prompt = ("AGENT'S RECORDED PRIVATE REASONING:\n" +
                   "\n".join(f"- {t}" for t in thoughts))
+        return self._judge(prompt, COGNITIVE_MONITOR_SYSTEM_PROMPT)
+
+    def evaluate_trajectory(self, trace_ids: List[str]) -> CognitiveVerdict:
+        """History-aware judgment over the reasoning of every round so far.
+
+        Unlike :meth:`evaluate` (which sees only one round's cognition), this
+        reads the recorded reasoning for each ``trace_id`` in order and judges
+        the *sequence* — so it can flag a recon-then-impersonate pattern that no
+        single round reveals.
+        """
+        rounds: List[str] = []
+        for i, tid in enumerate(trace_ids, start=1):
+            thoughts = self._read_cognition(tid)
+            joined = " ".join(thoughts).strip() if thoughts else "(no reasoning recorded)"
+            rounds.append(f"Round {i}: {joined}")
+        if not rounds:
+            return CognitiveVerdict(False, "no cognitive events recorded")
+        prompt = ("AGENT'S RECORDED PRIVATE REASONING, IN ORDER ACROSS ROUNDS:\n" +
+                  "\n".join(rounds))
+        return self._judge(prompt, COGNITIVE_MONITOR_TRAJECTORY_SYSTEM_PROMPT)
+
+    def judge_reasoning_sequence(self, reasonings: List[str]) -> CognitiveVerdict:
+        """History-aware judgment over an explicit list of per-round reasoning
+        strings (rather than reading the trace file). Used by the transparency
+        experiment, which synthesizes the reasoning an attacker *would* record
+        under different levels of cognitive-channel control while holding the
+        actual action trajectory fixed.
+        """
+        rounds: List[str] = []
+        for i, r in enumerate(reasonings, start=1):
+            joined = (r or "").strip() or "(no reasoning recorded)"
+            rounds.append(f"Round {i}: {joined}")
+        if not rounds:
+            return CognitiveVerdict(False, "no cognitive events recorded")
+        prompt = ("AGENT'S RECORDED PRIVATE REASONING, IN ORDER ACROSS ROUNDS:\n" +
+                  "\n".join(rounds))
+        return self._judge(prompt, COGNITIVE_MONITOR_TRAJECTORY_SYSTEM_PROMPT)
+
+    def _judge(self, prompt: str, system: str) -> CognitiveVerdict:
         try:
-            raw = gateway.chat(prompt, system=COGNITIVE_MONITOR_SYSTEM_PROMPT,
-                               model=self._model, max_tokens=250,
-                               temperature=self._temperature)
+            raw = gateway.chat(prompt, system=system, model=self._model,
+                               max_tokens=250, temperature=self._temperature)
         except Exception as exc:
             return CognitiveVerdict(True, f"monitor error, failing closed: {exc}")
         obj = _parse(raw)

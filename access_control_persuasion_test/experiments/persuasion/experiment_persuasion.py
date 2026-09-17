@@ -32,6 +32,15 @@ Seeds run in parallel (one subprocess each; own trace dir).
 
 from __future__ import annotations
 
+# --- package path bootstrap (auto-added by reorg) ---------------------
+import sys as _sys
+from pathlib import Path as _P
+_ROOT = _P(__file__).resolve().parents[2]   # access_control_persuasion_test/
+for _p in (str(_ROOT / "lib"), str(_ROOT.parent / "LLM_API")):
+    if _p not in _sys.path:
+        _sys.path.insert(0, _p)
+# ---------------------------------------------------------------------
+
 import argparse
 import json
 import subprocess
@@ -56,7 +65,7 @@ def run_one_seed(seed: int) -> dict:
     from attacker import PersuasionAttacker
     import shutil
 
-    run_dir = _HERE / "trace_logs" / f"_run_seed{seed}"
+    run_dir = _ROOT / "trace_logs" / f"_run_seed{seed}"
     if run_dir.exists():
         shutil.rmtree(run_dir)
     trace_file = run_dir / "traces.jsonl"
@@ -132,7 +141,7 @@ def _spawn(seed: int, out: Path) -> subprocess.Popen:
 
 
 def run_parallel() -> List[dict]:
-    tmp = _HERE / "results" / "_seed_tmp"
+    tmp = _ROOT / "results" / "_seed_tmp"
     tmp.mkdir(parents=True, exist_ok=True)
     pending = list(range(1, SEEDS + 1))
     running: dict = {}
@@ -185,7 +194,7 @@ def summarize(results: List[dict]) -> None:
         print(f"\n  rounds-to-GRANT (evaders): mean={statistics.mean(grounds):.2f} "
               f"min={min(grounds)} max={max(grounds)} dist={sorted(grounds)}")
 
-    out = _HERE / "results" / "persuasion.json"
+    out = _ROOT / "results" / "persuasion.json"
     out.parent.mkdir(exist_ok=True)
     out.write_text(json.dumps({
         "config": {"seeds": n, "max_rounds": MAX_ROUNDS, "temperature": TEMPERATURE,
