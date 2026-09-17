@@ -23,6 +23,9 @@ measured quantity.
 
 from __future__ import annotations
 
+import os
+os.environ.setdefault("INVARIANT_MAX_ITERATIONS", "50000")
+
 import time
 from typing import Any, Dict, List, Optional
 

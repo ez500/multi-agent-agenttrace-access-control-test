@@ -58,6 +58,8 @@ def run_config(arm: str, scenario: str, extra: dict | None = None) -> dict:
         if f.exists():
             cfg[f"policy_sha_{arm_id}"] = hashlib.sha1(f.read_bytes()).hexdigest()[:12]
     cfg["classifier_pin"] = "protectai/deberta-v3-base-prompt-injection-v2"
+    cfg["sampling"] = ("API default; this SDK/model removed temperature. Seed is "
+                       "a trial index; variance is inherent nondeterminism.")
     try:
         cfg["git_sha"] = subprocess.check_output(
             ["git", "rev-parse", "--short", "HEAD"], cwd=str(root),

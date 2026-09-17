@@ -40,7 +40,9 @@ def _ensure_env() -> None:
         _ENV_LOADED = True
         return
     here = Path(__file__).resolve()
-    for parent in (here.parent, *here.parents):
+    cwd = Path.cwd().resolve()
+    # cwd (the scenario directory) first, then walk up from this file.
+    for parent in (cwd, *cwd.parents, here.parent, *here.parents):
         cand = parent / ".env"
         if cand.exists():
             load_dotenv(cand)
@@ -126,8 +128,13 @@ def call_haiku(system: str, user: str, *, model: Optional[str] = None,
     """A single Haiku turn with no tools."""
     model_name = model or os.environ.get("ANTHROPIC_MODEL") or DEFAULT_MODEL
     client = _get_client()
+    # This SDK targets current-generation models, which removed the sampling
+    # params (temperature/top_p/top_k). We accept `temperature` in the wrapper
+    # for call-site stability but do not forward it; runs use the API default,
+    # and seed variance comes from inherent sampling nondeterminism (the seed is
+    # a trial index only). See config.json note.
     resp = client.messages.create(
-        model=model_name, max_tokens=max_tokens, temperature=temperature,
+        model=model_name, max_tokens=max_tokens,
         system=system, messages=[{"role": "user", "content": user}],
     )
     usage = getattr(resp, "usage", None)
@@ -168,7 +175,7 @@ def call_haiku_with_tools(
     for _ in range(max(0, max_rounds)):
         rounds += 1
         resp = client.messages.create(
-            model=model_name, max_tokens=max_tokens, temperature=temperature,
+            model=model_name, max_tokens=max_tokens,
             system=system, messages=messages, tools=tools,
         )
         usage = getattr(resp, "usage", None)

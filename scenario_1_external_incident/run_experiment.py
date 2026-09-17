@@ -26,6 +26,7 @@ from logproc.runs import mint_run_id
 from logproc.tiers import ARMS
 
 HERE = Path(__file__).resolve().parent
+CHILD_TIMEOUT = 600  # a child exceeding this is killed and recorded as an error
 RESULTS = HERE / "results"
 SCENARIO_TAG = "s1"
 
@@ -56,9 +57,17 @@ def _spawn(arm, seed, trigger, window, model, dry_run, md_llm, control, tmp) -> 
     if dry_run: cmd.append("--dry-run")
     if md_llm: cmd.append("--md-llm")
     if control: cmd.append("--control")
-    p = subprocess.Popen(cmd, cwd=str(HERE), stdout=subprocess.DEVNULL,
-                         stderr=subprocess.PIPE)
-    p._out_path = out  # type: ignore
+    log_path = RESULTS / run_id / "run.log"
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    logf = open(log_path, "w")
+    # Redirect child stdout+stderr to a per-run file. Capturing stderr into a
+    # PIPE the parent drains only after exit deadlocks the child once the
+    # transformers/Invariant progress output fills the ~64KB pipe buffer.
+    p = subprocess.Popen(cmd, cwd=str(HERE), stdout=logf, stderr=subprocess.STDOUT)
+    p._out_path = out            # type: ignore
+    p._log_path = log_path       # type: ignore
+    p._logf = logf               # type: ignore
+    p._start = time.time()       # type: ignore
     p._label = f"{arm}/s{seed}{'/ctrl' if control else ''}"  # type: ignore
     return p
 
@@ -86,13 +95,18 @@ def _parent(args) -> int:
             print(f"  launched {p._label}")
         time.sleep(0.5)
         for p in running[:]:
+            if p.poll() is None and (time.time() - p._start) > CHILD_TIMEOUT:
+                p.kill()
             if p.poll() is not None:
                 running.remove(p)
+                try: p._logf.close()
+                except Exception: pass
                 if p.returncode == 0 and Path(p._out_path).exists():
                     done.append(json.loads(Path(p._out_path).read_text()))
                     print(f"  done {p._label}: {done[-1]['outcome']}")
                 else:
-                    err = p.stderr.read().decode()[-500:] if p.stderr else ""
+                    try: err = Path(p._log_path).read_text()[-800:]
+                    except Exception: err = ""
                     print(f"  FAILED {p._label} rc={p.returncode}\n{err}")
 
     _aggregate(done, arms, args, time.time() - t0)
