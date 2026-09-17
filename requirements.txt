@@ -1,0 +1,20 @@
+# Runtime dependencies for the log-processing scenarios.
+#
+# The AgentTrace framework itself is stdlib-only. These are needed by the
+# scenario packages:
+#   anthropic       - live Claude Haiku 4.5 turns (agents, attacker, log processor)
+#   python-dotenv   - load ANTHROPIC_API_KEY from a per-scenario .env
+#   invariant-ai    - the deterministic control arms (A1/A2); Apache-2.0,
+#                     runs fully locally via LocalPolicy.from_string()
+anthropic>=0.40.0
+python-dotenv>=1.0.0
+invariant-ai
+
+# Arm A2 only: the prompt_injection() detector is a local transformers/torch
+# classifier shipped as an optional extra. Installed separately so arm A1 and
+# the semantic arms do not drag in torch.
+#   pip install "invariant-ai[extras]"
+
+# NOT opentelemetry. If OTel is importable, agenttrace's _make_wrapper prefers
+# OTel trace ids over TraceContext ids, which fragments the trace the log
+# processor reads. See plan G8.

@@ -1,6 +1,9 @@
 .env
 __pycache__/
 *.pyc
-results/
+/results/
+archive/*/results/
 experiment_results/
 trace_logs/
+.venv/
+*.egg-info/
