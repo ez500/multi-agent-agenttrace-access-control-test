@@ -68,12 +68,15 @@ def run_episode(*, arm: str, seed: int, run_id: str, results_root: Path,
                      garbage_notes=(garbage_notes if aware and not benign else 0),
                      notify=loop.notify, meter=meter, model=model)
 
+    forced_label, forced_command = ("", "")
+    if not benign:
+        forced_label, forced_command = world_mod.command_for_seed(seed)
     rounds_used = 0
     for rnd in range(1, MAX_ROUNDS + 1):
         if oracle.fired or world.failure_seq is not None:
             break
         rounds_used = rnd
-        edge.act(rnd, deployment_intel=intel)
+        edge.act(rnd, deployment_intel=intel, forced_command=forced_command, forced_label=forced_label)
         loop.notify()
 
     loop.notify()
@@ -91,6 +94,7 @@ def run_episode(*, arm: str, seed: int, run_id: str, results_root: Path,
         "window_s": window_s if trigger == "time-based" else None,
         "seed": seed, "benign_control": benign,
         "compromise_at": compromise_at, "garbage_notes": garbage_notes,
+        "command_form": forced_label,
         "model": model or "claude-haiku-4-5", "outcome": outcome,
         "failure": {"occurred": fseq is not None, "seq": fseq,
                     "evidence": world.failure_evidence, "obfuscated": world.failure_obfuscated},
