@@ -154,6 +154,60 @@ than per-message.
 This is the honest boundary of the mechanism: it is robust to *what* is emitted and
 fragile to *how the flow is structured*.
 
+## RQ5 — External validity: AgentDojo (public benchmark)
+
+We port the trigger-scoped monitor onto **AgentDojo** (workspace suite), a public
+prompt-injection benchmark whose attacks and tasks we did not design. The agent runs
+on our gateway (Claude Sonnet 4.6) via a prompting-protocol adapter; the monitor is a
+pipeline element that observes the tool-call trace, triggers, and runs the scoped audit.
+
+**Robust agent (default).** Sonnet 4.6 resists the injections — `important_instructions`,
+`tool_knowledge`, `ignore_previous` all reach **ASR ≈ 0** on user_tasks 0–2 × injection
+tasks 0–2. With no hijack there is nothing to detect; the monitor triggers on injected
+content but correctly raises **0 false positives** (it clears the non-hijacked runs) and
+never fires on benign tasks. On a robust model the value is the FP/cost story, not detection.
+
+**Susceptible agent (to obtain hijacks).** To measure detection we weaken the agent's
+system prompt so injections land (this isolates *our detection* from *model robustness*,
+which is not our contribution). The plain `direct` attack then succeeds (ASR ≈ 5–6/9),
+giving real hijacks to detect. Trigger ablation over these hijacks:
+
+| trigger | detection (recall) | audits run | FP (benign) |
+|---|---|---|---|
+| content-cue (injected-instruction phrases) | **1/5** | 3/12 | 0/3 |
+| **action/flow (agent invokes a state-changing sink tool)** | **5/5** | 5/12 | 0/3 |
+| cue OR action | 5/5 | — | 0/3 |
+
+**Findings.**
+- **Trigger design determines recall.** The content-cue trigger misses plainly-phrased
+  attacks (`direct` carries none of its cues → 1/5). The action/flow trigger — fire when
+  the agent calls a state-changing sink (`send_email`, `delete_file`, `create_calendar_event`)
+  — catches every hijack (5/5), because a hijack must *act*.
+- **At no FP cost.** The benign user tasks are read-only, so they never invoke a sink,
+  never trigger, and cost no audit — 0 FP for both triggers.
+- **Same trigger as the mesh success-type case.** The winning AgentDojo trigger is the
+  flow trigger from RQ1's success-type family (fire on a state-changing / out-of-boundary
+  action, then audit for legitimacy), unifying the single-agent and mesh results.
+
+**Baseline — vs AgentDojo's built-in PI detector.** On the same susceptible + `direct`
+runs (6 hijacks, 3 benign) we run AgentDojo's shipped `TransformersBasedPIDetector`
+(a deberta prompt-injection classifier) alongside our monitor:
+
+| detector | detection | FP (benign) | cost shape |
+|---|---|---|---|
+| **ours** (action trigger + scoped LLM audit) | **5/6** | **0/3** | 6 LLM audits — only on a trigger |
+| built-in deberta PI detector | 5/6 | **1/3** | 26 transformer inferences — one per tool result, always-on |
+
+Comparable detection, but ours has **fewer false positives** and runs the expensive
+judgment far less often (audit only on a trigger vs a classifier on every tool result).
+The signals also differ: the built-in detector flags injection *presence* — it fires even
+on runs where the agent *resisted* the injection, and false-positives on a benign tool
+result — whereas ours flags actual *hijack*, aligning alerts with harm. (Honest miss: our
+audit missed one hijack where the action trigger fired but the audit judged it benign.)
+
+Caveats: the susceptible configuration is an intentional victim to expose hijacks; a single
+suite, small n, one gateway model (attacker/agent/auditor share a family).
+
 ## Key findings (bullets)
 
 1. A cheap, declared, deterministic trigger + a provenance-scoped LLM audit detects both
@@ -175,8 +229,13 @@ fragile to *how the flow is structured*.
 - **Scale / seed:** n is tens of sessions per condition and the gateway ignores the
   sampling seed, so rates are directional, not exact; a larger, seed-controlled run
   would tighten the intervals.
-- **Self-audit:** attacker and auditor are the same model family; cross-model auditing is
-  future work.
+- **Self-audit — addressed.** We re-ran the audit on a *different model family*
+  (`gpt-5.6-luna`) while the agents stayed on Claude. The success-type result holds
+  (TP 2/2, FP 0) and the evasion curve holds — content-level evasion still fails to
+  evade (L0–L3 caught), structural evasion still evades (L5 laundering, L6 dilution);
+  the only shift is L4 (chunk+dilute) dropping to 2/4 (vs 4/4 on Claude), i.e. the
+  cross-model auditor is marginally weaker at reassembling diluted fragments but reaches
+  the same qualitative conclusions. Detection is not "Claude judging Claude."
 - **Modelled compromise:** the success-type attacker's actions are scripted (we evaluate
   *detection*, not whether the model can be jailbroken into exfiltrating).
 - **Evasion (measured, RQ4):** content-level tricks (encoding, base32, chunking) do
