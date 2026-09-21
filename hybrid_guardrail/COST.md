@@ -38,6 +38,7 @@ gateway.chat = counted
 | experiment | model(s) | gateway calls | tokens (in/out, ~) |
 |---|---|---|---|
 | exfil evasion gradient, cross-model auditor | gpt-5.6-luna | **24** | 9.5k / 0.7k |
+| multi-hop taint (3 cases: laundered / telemetry / relay) | claude | **2** | — (laundered flagged deterministically, no LLM) |
 
 ## Estimated (this session, by run count × per-run model)
 

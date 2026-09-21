@@ -151,8 +151,28 @@ than per-message.
   input budget — the evidence is **out of window**. Defeating this needs **chunked or
   retrieval-based auditing**, not a single bounded pass.
 
-This is the honest boundary of the mechanism: it is robust to *what* is emitted and
-fragile to *how the flow is structured*.
+This is the honest boundary of the single-hop mechanism: it is robust to *what* is
+emitted and fragile to *how the flow is structured*.
+
+### Closing L5 with multi-hop provenance taint
+
+We then propagate a taint label along the trace's message graph (`taint.py`): a
+sensitive read taints the reader; a message from a tainted agent taints the receiver;
+a tainted agent that emits out of the boundary raises an alert carrying the whole
+**chain** (source read → relays → emit), which the audit reads.
+
+| case | single-hop trigger | multi-hop taint | chain audit |
+|---|---|---|---|
+| laundered exfil (relay the secret, peer emits it) | **misses** | **fires** (1 hop) | **FLAG** |
+| tainted telemetry (relay benign, peer emits benign) | misses | fires (over-taint) | **clear** |
+| internal relay, no boundary crossing | misses | silent | — |
+
+Multi-hop taint **recovers L5** (the laundered exfil the single-hop trigger missed) and,
+because structural taint over-approximates, the benign tainted-telemetry case still fires
+the trigger but is **cleared by the chain-scoped audit** (no secret in the chain) — the
+coarse-trigger / precise-audit split extended across hops, at no false positive. Remaining
+limits: taint over-approximation can spread in a chatty mesh (more audits), and this is
+within-trace only — cross-session laundering needs cross-trace provenance.
 
 ## RQ5 — External validity: AgentDojo (public benchmark)
 
@@ -239,10 +259,12 @@ suite, small n, one gateway model (attacker/agent/auditor share a family).
 - **Modelled compromise:** the success-type attacker's actions are scripted (we evaluate
   *detection*, not whether the model can be jailbroken into exfiltrating).
 - **Evasion (measured, RQ4):** content-level tricks (encoding, base32, chunking) do
-  *not* evade — provenance-scoped auditing reassembles them. Two structural evasions do:
-  cross-agent laundering (0/4 — no single-hop trigger fires; needs multi-hop provenance
-  taint) and heavy dilution past the audit's input budget (0/4 — needs chunked/retrieval
-  auditing). Recall, not precision, is the exposed edge.
+  *not* evade — provenance-scoped auditing reassembles them. Cross-agent laundering
+  evades the single-hop trigger but is **recovered by multi-hop provenance taint**
+  (taint.py; the benign tainted case is cleared by the chain audit, no FP). Heavy
+  dilution past the audit's input budget still evades (0/4 — needs chunked/retrieval
+  auditing), and taint is within-trace (cross-session laundering is open). Recall, not
+  precision, is the exposed edge.
 - **Synthetic mesh:** a single scenario; external validity via a public agent-security
   benchmark (e.g. AgentDojo / InjecAgent) is the natural next step.
 
