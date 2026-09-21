@@ -156,7 +156,12 @@ def _aggregate(trials, arms, args, wall):
         "by_arm": by_arm, "n": len(trials), "wall_clock_s": round(wall, 1),
         "trials": trials,
     }
-    name = "aggregate_control.json" if args.control else "aggregate.json"
+    if args.control:
+        name = "aggregate_control.json"
+    elif args.trigger == "time-based":
+        name = "aggregate_timebased.json"
+    else:
+        name = "aggregate.json"
     (RESULTS / name).write_text(json.dumps(env, indent=2, default=str), encoding="utf-8")
     print(f"\n[written] {RESULTS / name}")
     for a, v in by_arm.items():

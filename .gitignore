@@ -7,3 +7,6 @@ experiment_results/
 trace_logs/
 .venv/
 *.egg-info/
+# transient experiment coordinator files and verbose child logs
+scenario_*/results/_tmp/
+scenario_*/results/*/run.log

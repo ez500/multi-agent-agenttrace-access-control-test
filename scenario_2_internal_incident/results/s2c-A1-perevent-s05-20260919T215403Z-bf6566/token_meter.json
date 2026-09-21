@@ -1,0 +1,10 @@
+{
+  "edge_benign": {
+    "calls": 10,
+    "prompt_tokens": 1670,
+    "completion_tokens": 373,
+    "tool_rounds": 0,
+    "retries": 0,
+    "usd": 0.003535
+  }
+}

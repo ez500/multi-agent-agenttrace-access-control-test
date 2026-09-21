@@ -1,0 +1,12 @@
+{
+  "scenario": "scenario_1_external_incident",
+  "arm": "A1",
+  "python": "/home/bigfatmidget/Projects/Research/Wistron/multi-agent-agenttrace-access-control-test/.venv/bin/python",
+  "anthropic": "1.6.0",
+  "invariant_ai": "0.3.5",
+  "policy_sha_A1": "cb247dd6172b",
+  "policy_sha_A2": "e6ea1670bdca",
+  "classifier_pin": "protectai/deberta-v3-base-prompt-injection-v2",
+  "sampling": "API default; this SDK/model removed temperature. Seed is a trial index; variance is inherent nondeterminism.",
+  "git_sha": "7885c68"
+}

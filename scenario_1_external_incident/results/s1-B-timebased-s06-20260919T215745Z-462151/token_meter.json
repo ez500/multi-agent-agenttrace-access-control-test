@@ -1,0 +1,34 @@
+{
+  "attacker": {
+    "calls": 1,
+    "prompt_tokens": 371,
+    "completion_tokens": 238,
+    "tool_rounds": 0,
+    "retries": 0,
+    "usd": 0.001561
+  },
+  "edge_intake": {
+    "calls": 1,
+    "prompt_tokens": 414,
+    "completion_tokens": 89,
+    "tool_rounds": 0,
+    "retries": 0,
+    "usd": 0.000859
+  },
+  "log_processor": {
+    "calls": 3,
+    "prompt_tokens": 7009,
+    "completion_tokens": 823,
+    "tool_rounds": 4,
+    "retries": 0,
+    "usd": 0.011124
+  },
+  "main_analyse": {
+    "calls": 1,
+    "prompt_tokens": 453,
+    "completion_tokens": 96,
+    "tool_rounds": 0,
+    "retries": 0,
+    "usd": 0.000933
+  }
+}

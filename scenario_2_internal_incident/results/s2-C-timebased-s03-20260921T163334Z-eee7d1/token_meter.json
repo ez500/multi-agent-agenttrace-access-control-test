@@ -1,0 +1,26 @@
+{
+  "edge_benign": {
+    "calls": 1,
+    "prompt_tokens": 167,
+    "completion_tokens": 34,
+    "tool_rounds": 0,
+    "retries": 0,
+    "usd": 0.000337
+  },
+  "edge_rogue": {
+    "calls": 1,
+    "prompt_tokens": 603,
+    "completion_tokens": 278,
+    "tool_rounds": 0,
+    "retries": 0,
+    "usd": 0.001993
+  },
+  "log_processor": {
+    "calls": 3,
+    "prompt_tokens": 9565,
+    "completion_tokens": 556,
+    "tool_rounds": 5,
+    "retries": 0,
+    "usd": 0.012345
+  }
+}
