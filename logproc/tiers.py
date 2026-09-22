@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from .invariant_tier import InvariantTier
+from .null_tier import NullTier
 from .oracle import NeutralizeOracle
 from .processor import LogProcessorAgent
 
@@ -22,6 +23,7 @@ ARMS = {
            "policy": "a2_with_classifier.ipl", "aware": False},
     "B":  {"label": "log processing (semantic)", "kind": "semantic", "aware": False},
     "C":  {"label": "log processing (adversary aware)", "kind": "semantic", "aware": True},
+    "N":  {"label": "no defense", "kind": "none", "aware": False},
 }
 
 
@@ -36,6 +38,8 @@ def build_tier(arm: str, *, oracle: NeutralizeOracle, run_trace_id: str,
                processor_system: str, model: Optional[str], temperature: float,
                meter: Any):
     spec = ARMS[arm]
+    if spec["kind"] == "none":
+        return NullTier(oracle, run_trace_id, label=arm)
     if spec["kind"] == "invariant":
         return InvariantTier(policy_text(arm), oracle, run_trace_id, label=arm)
     return LogProcessorAgent(processor_system, oracle, run_trace_id,

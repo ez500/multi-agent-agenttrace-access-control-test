@@ -4,6 +4,18 @@
 The per-run result.json in each results/<run-id>/ is the source of truth; the
 aggregate files are derived. This regenerates them so a lost or clobbered
 aggregate is always recoverable.
+
+Two quantities are derived here rather than in the episode, because they are
+cross-run by nature:
+
+  detected   -- did the arm fire `neutralize` at all on this run, whether or
+                not a breach was on its way? This separates ATTEMPT DETECTION
+                from BREACH PREVENTION. An arm can score zero evasion because
+                it stopped the attack, or because the attack never worked; the
+                no-defense arm N and this column are what tell those apart.
+  latency    -- per-judgment wall-clock, read back from verdicts.jsonl, as
+                p50/p95. The defense is an event-driven runtime intervention,
+                so how long a verdict takes is a first-order property of it.
 """
 from __future__ import annotations
 import json, math, sys
@@ -11,14 +23,36 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SCENARIOS = ["scenario_1_external_incident", "scenario_2_internal_incident"]
-ARMS = ["A1", "A2", "B", "C"]
+ARMS = ["N", "A1", "A2", "B", "C"]
 
 
 def wilson(k, n, z=1.96):
     if n == 0: return [0.0, 0.0]
     p = k / n; d = 1 + z*z/n; c = p + z*z/(2*n)
     h = z*math.sqrt(p*(1-p)/n + z*z/(4*n*n))
-    return [round((c-h)/d, 3), round((c+h)/d, 3)]
+    lo, hi = (c - h) / d, (c + h) / d
+    return [round(max(0.0, lo), 3), round(min(1.0, hi), 3)]
+
+
+def pct(xs, q):
+    """Nearest-rank percentile; no interpolation, so a reported p95 is a
+    latency that was actually observed."""
+    if not xs: return 0.0
+    s = sorted(xs)
+    i = min(len(s) - 1, max(0, math.ceil(q * len(s)) - 1))
+    return round(s[i], 1)
+
+
+def _latencies(run_dir: Path):
+    f = run_dir / "verdicts.jsonl"
+    if not f.exists(): return []
+    out = []
+    for line in f.read_text(errors="ignore").splitlines():
+        line = line.strip()
+        if not line: continue
+        try: out.append(float(json.loads(line).get("latency_ms") or 0.0))
+        except Exception: continue
+    return out
 
 
 def aggregate(trials, arms):
@@ -30,13 +64,19 @@ def aggregate(trials, arms):
         ev = sum(1 for t in rows if t["outcome"] == "evaded")
         rs = sum(1 for t in rows if t["outcome"] == "resolved")
         ni = sum(1 for t in rows if t["outcome"] == "no_incident")
+        det = sum(1 for t in rows if (t.get("neutralize") or {}).get("fired"))
         dtok = [t["processor"]["prompt_tokens"] + t["processor"]["completion_tokens"] for t in rows]
+        lat = [x for t in rows for x in t.get("_latencies", [])]
         by[a] = {"n": n, "evaded": ev, "resolved": rs, "no_incident": ni,
+                 "detected": det,
+                 "detect_rate": round(det/n, 3), "detect_wilson95": wilson(det, n),
                  "errors": sum(t["processor"]["errors"] for t in rows),
                  "evasion_rate": round(ev/n, 3), "evasion_wilson95": wilson(ev, n),
                  "mean_prompts": round(sum(t["processor"]["prompts_issued"] for t in rows)/n, 2),
                  "mean_defense_tokens": round(sum(dtok)/n, 1),
                  "mean_defense_usd": round(sum(t["cost_usd"]["defense"] for t in rows)/n, 5),
+                 "n_judgments": len(lat),
+                 "latency_p50_ms": pct(lat, 0.50), "latency_p95_ms": pct(lat, 0.95),
                  "verdict_action_mismatch": sum(t["verdict_action_mismatch"] for t in rows)}
     return by
 
@@ -49,6 +89,7 @@ def main():
         buckets = {}
         for rj in rd.glob("*/result.json"):
             t = json.loads(rj.read_text())
+            t["_latencies"] = _latencies(rj.parent)
             flood = (t.get("garbage_notes") or 0) > 0
             tb = t.get("trigger") == "time-based"
             if t.get("benign_control"):
@@ -66,10 +107,13 @@ def main():
                  "flood_timebased": "aggregate_flood_timebased.json"}
         for key, trials in buckets.items():
             arms = sorted({t["arm"] for t in trials}, key=lambda a: ARMS.index(a) if a in ARMS else 9)
+            by_arm = aggregate(trials, arms)
+            for t in trials:
+                t.pop("_latencies", None)
             env = {"config": {"scenario": scn, "rebuilt_from": "result.json files",
                               "trigger": trials[0].get("trigger"),
                               "control": key == "control"},
-                   "by_arm": aggregate(trials, arms), "n": len(trials), "trials": trials}
+                   "by_arm": by_arm, "n": len(trials), "trials": trials}
             (rd / names[key]).write_text(json.dumps(env, indent=2, default=str))
             print(f"{scn}/{names[key]}: {len(trials)} runs, arms {arms}")
 

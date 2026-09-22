@@ -77,7 +77,8 @@ def _parent(args) -> int:
     tmp = RESULTS / "_tmp"
     tmp.mkdir(exist_ok=True)
     arms = args.arms.split(",")
-    jobs = [(a, s) for a in arms for s in range(args.seeds)]
+    jobs = [(a, s) for a in arms
+            for s in range(args.seed_start, args.seed_start + args.seeds)]
     if args.control:
         pass  # control runs are a separate invocation; keep the grid clean
 
@@ -176,6 +177,9 @@ def main() -> int:
     ap.add_argument("--arms", default="A1,A2,B,C")
     ap.add_argument("--arm", default="B")
     ap.add_argument("--seeds", type=int, default=10)
+    ap.add_argument("--seed-start", type=int, default=0,
+                    help="first trial index; lets a later batch extend an "
+                         "existing run set instead of overwriting it")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--run-id", default="")
     ap.add_argument("--out", default="")

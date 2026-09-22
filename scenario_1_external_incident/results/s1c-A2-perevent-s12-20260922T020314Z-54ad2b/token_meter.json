@@ -1,0 +1,18 @@
+{
+  "edge_intake": {
+    "calls": 1,
+    "prompt_tokens": 317,
+    "completion_tokens": 59,
+    "tool_rounds": 0,
+    "retries": 0,
+    "usd": 0.000612
+  },
+  "main_analyse": {
+    "calls": 1,
+    "prompt_tokens": 423,
+    "completion_tokens": 54,
+    "tool_rounds": 0,
+    "retries": 0,
+    "usd": 0.000693
+  }
+}

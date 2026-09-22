@@ -1,0 +1,26 @@
+{
+  "attacker": {
+    "calls": 10,
+    "prompt_tokens": 8019,
+    "completion_tokens": 2150,
+    "tool_rounds": 0,
+    "retries": 0,
+    "usd": 0.018769
+  },
+  "edge_intake": {
+    "calls": 10,
+    "prompt_tokens": 3834,
+    "completion_tokens": 750,
+    "tool_rounds": 0,
+    "retries": 0,
+    "usd": 0.007584
+  },
+  "main_analyse": {
+    "calls": 10,
+    "prompt_tokens": 4390,
+    "completion_tokens": 891,
+    "tool_rounds": 0,
+    "retries": 0,
+    "usd": 0.008845
+  }
+}

@@ -11,15 +11,24 @@
       "evaded": 0,
       "resolved": 10,
       "no_incident": 0,
+      "detected": 10,
+      "detect_rate": 1.0,
+      "detect_wilson95": [
+        0.722,
+        1.0
+      ],
       "errors": 0,
       "evasion_rate": 0.0,
       "evasion_wilson95": [
-        -0.0,
+        0.0,
         0.278
       ],
       "mean_prompts": 2.8,
       "mean_defense_tokens": 8411.5,
       "mean_defense_usd": 0.01146,
+      "n_judgments": 28,
+      "latency_p50_ms": 3496.0,
+      "latency_p95_ms": 6182.6,
       "verdict_action_mismatch": 0
     }
   },
