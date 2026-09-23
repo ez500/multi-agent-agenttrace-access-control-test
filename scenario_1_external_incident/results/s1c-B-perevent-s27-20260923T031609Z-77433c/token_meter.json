@@ -1,0 +1,26 @@
+{
+  "edge_intake": {
+    "calls": 10,
+    "prompt_tokens": 3158,
+    "completion_tokens": 553,
+    "tool_rounds": 0,
+    "retries": 0,
+    "usd": 0.005923
+  },
+  "log_processor": {
+    "calls": 7,
+    "prompt_tokens": 19223,
+    "completion_tokens": 1702,
+    "tool_rounds": 7,
+    "retries": 0,
+    "usd": 0.027733
+  },
+  "main_analyse": {
+    "calls": 10,
+    "prompt_tokens": 4193,
+    "completion_tokens": 571,
+    "tool_rounds": 0,
+    "retries": 0,
+    "usd": 0.007048
+  }
+}
